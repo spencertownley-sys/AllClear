@@ -1,0 +1,22 @@
+{
+  "name": "allclear",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AllClear — one dashboard for weather, wildfire, earthquake, air-quality and official-alert status for the places you care about.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @allclear/web dev",
+    "dev:worker": "pnpm --filter @allclear/worker dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "start:worker": "pnpm --filter @allclear/worker start"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}
