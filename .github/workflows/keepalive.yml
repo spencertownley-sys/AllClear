@@ -1,0 +1,21 @@
+name: Keep Supabase awake
+
+# Free-tier Supabase projects pause after 7 days without API traffic, which takes the
+# whole app down until someone restores it. Until the worker is polling (which keeps
+# the project warm on its own), one public map request every 6 hours is enough.
+# Delete this file once the worker has SUPABASE_SERVICE_ROLE_KEY and is running.
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request the public map (a read through the Supabase cache)
+        env:
+          APP_URL: ${{ vars.APP_URL || 'https://web-production-41f16.up.railway.app' }}
+        run: |
+          curl -fsS --max-time 60 "$APP_URL/api/hazards/map?bbox=-123,45,-122,46&layers=quakes" -o /dev/null
+          echo "ok"
