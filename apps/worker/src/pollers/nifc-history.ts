@@ -30,6 +30,12 @@ export interface HistoryFeature {
   };
 }
 
+/** NIFC records an unknown year as 9999 (and the odd 0 / 1900); treat anything implausible as unknown. */
+export function plausibleYear(value: unknown, now: Date): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return value >= 1900 && value <= now.getUTCFullYear() + 1 ? value : null;
+}
+
 export function normalizeHistory(feature: HistoryFeature, now: Date): EventInsert | null {
   const p = feature.properties;
   if (!feature.geometry || p.OBJECTID === undefined) return null;
@@ -37,7 +43,7 @@ export function normalizeHistory(feature: HistoryFeature, now: Date): EventInser
   const geometry = geojsonToEwkt(feature.geometry);
   const center = bboxCenter(feature.geometry);
   if (!geometry || !center) return null;
-  const year = typeof p.FIRE_YEAR_INT === 'number' ? p.FIRE_YEAR_INT : null;
+  const year = plausibleYear(p.FIRE_YEAR_INT, now);
   return {
     source: 'inciweb',
     external_id: `nifc-hist:${p.OBJECTID}`,
@@ -63,7 +69,7 @@ export function normalizeHistory(feature: HistoryFeature, now: Date): EventInser
 async function fetchCell(base: string, cell: Cell, sinceYear: number, now: Date): Promise<EventInsert[]> {
   const box = bboxAround(cell, CELL_REACH_MILES);
   const url = new URL(base);
-  url.searchParams.set('where', `FIRE_YEAR_INT >= ${sinceYear}`);
+  url.searchParams.set('where', yearWindow(sinceYear, now));
   url.searchParams.set('geometry', `${box.minLng},${box.minLat},${box.maxLng},${box.maxLat}`);
   url.searchParams.set('geometryType', 'esriGeometryEnvelope');
   url.searchParams.set('inSR', '4326');
@@ -80,9 +86,14 @@ async function fetchCell(base: string, cell: Cell, sinceYear: number, now: Date)
   return (data.features ?? []).map((f) => normalizeHistory(f, now)).filter((r): r is EventInsert => r !== null);
 }
 
+/** Year window for a query; the upper bound drops NIFC's 9999 "unknown year" placeholder rows. */
+export function yearWindow(sinceYear: number, now: Date): string {
+  return `FIRE_YEAR_INT >= ${sinceYear} AND FIRE_YEAR_INT <= ${now.getUTCFullYear() + 1}`;
+}
+
 /** WHERE clause for the nationwide pass: only fires big enough to matter at map scale. */
-export function nationalWhere(sinceYear: number, minAcres = FIRE_HISTORY_NATIONAL_MIN_ACRES): string {
-  return `FIRE_YEAR_INT >= ${sinceYear} AND GIS_ACRES >= ${minAcres}`;
+export function nationalWhere(sinceYear: number, now: Date, minAcres = FIRE_HISTORY_NATIONAL_MIN_ACRES): string {
+  return `${yearWindow(sinceYear, now)} AND GIS_ACRES >= ${minAcres}`;
 }
 
 /**
@@ -96,7 +107,7 @@ async function fetchNational(base: string, sinceYear: number, now: Date): Promis
   let pages = 0;
   for (; pages < NATIONAL_MAX_PAGES; pages++) {
     const url = new URL(base);
-    url.searchParams.set('where', nationalWhere(sinceYear));
+    url.searchParams.set('where', nationalWhere(sinceYear, now));
     url.searchParams.set('outFields', 'OBJECTID,INCIDENT,FIRE_YEAR_INT,GIS_ACRES,UNQE_FIRE_ID');
     url.searchParams.set('orderByFields', 'GIS_ACRES DESC');
     url.searchParams.set('resultRecordCount', String(NATIONAL_PAGE));
