@@ -1,7 +1,7 @@
 'use client';
 
 import 'leaflet/dist/leaflet.css';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   CircleMarker,
   GeoJSON,
@@ -13,19 +13,13 @@ import {
   useMapEvents,
   type GeoJSONProps,
 } from 'react-leaflet';
+import * as L from 'leaflet';
 import type { LatLngBoundsExpression } from 'leaflet';
 import type { GeoJsonGeometry, MapFireDTO, MapQuakeDTO, StormDTO } from '@allclear/shared';
 import { formatDateTime, formatNumber } from '@/lib/format';
-import {
-  BASEMAPS,
-  DEFAULT_OVERLAYS,
-  OVERLAYS,
-  RADAR_TILE_URL,
-  SST_WMS_LAYER,
-  SST_WMS_URL,
-  type BasemapId,
-  type OverlayState,
-} from './basemaps';
+import { BASEMAPS, DEFAULT_OVERLAYS, OVERLAYS, SST_WMS_LAYER, SST_WMS_URL, type BasemapId, type OverlayState } from './basemaps';
+import { LEGACY_RADAR_TILE_URL, radarFrameTileUrl } from './radar';
+import { useRadarFrames } from './use-radar-frames';
 
 export interface MapPin {
   latitude: number;
@@ -105,6 +99,46 @@ function Recenter({ center, zoom }: { center: [number, number]; zoom: number }) 
   return null;
 }
 
+/**
+ * Small bottom-left control that plays/pauses the animated radar and shows which frame is live.
+ * Only rendered once RainViewer frames have loaded; the legacy fallback has nothing to animate.
+ */
+function RadarTimeControl({
+  time,
+  playing,
+  onToggle,
+}: {
+  time: number;
+  playing: boolean;
+  onToggle: () => void;
+}) {
+  const map = useMap();
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    L.DomEvent.disableClickPropagation(el);
+    L.DomEvent.disableScrollPropagation(el);
+  }, [map]);
+  const label = new Date(time * 1000).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return (
+    <div
+      ref={ref}
+      className="absolute bottom-2 left-2 z-[1000] flex items-center gap-2 rounded-control border border-slate-300 bg-white/95 px-2 py-1 text-xs text-slate-700 shadow-md"
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={playing ? 'Pause radar animation' : 'Play radar animation'}
+        className="rounded px-1.5 py-0.5 font-medium text-primary hover:bg-primary-soft"
+      >
+        {playing ? '⏸' : '▶'}
+      </button>
+      <span>Radar as of {label}</span>
+    </div>
+  );
+}
+
 function quakeRadius(magnitude: number): number {
   return Math.max(4, Math.min(22, magnitude * 3));
 }
@@ -150,6 +184,8 @@ export default function HazardMapInner({
 }: HazardMapProps) {
   const base = BASEMAPS[basemap] ?? BASEMAPS.street;
   const ov: OverlayState = { ...DEFAULT_OVERLAYS, ...overlays };
+  const radar = useRadarFrames(ov.radar);
+  const radarFrame = radar.host ? radar.frames[radar.index] : undefined;
   return (
     <MapContainer
       center={center}
@@ -179,10 +215,24 @@ export default function HazardMapInner({
         />
       ) : null}
       {ov.radar ? (
-        <TileLayer key="radar" url={RADAR_TILE_URL} opacity={0.65} zIndex={3} attribution={OVERLAYS.radar.attribution} />
+        radar.host && radarFrame ? (
+          <TileLayer
+            key={`radar-${radarFrame.time}`}
+            url={radarFrameTileUrl(radar.host, radarFrame)}
+            opacity={0.75}
+            zIndex={3}
+            attribution={OVERLAYS.radar.attribution}
+          />
+        ) : (
+          // RainViewer's frame list hasn't loaded (or failed) yet; show the CONUS-only composite rather than nothing.
+          <TileLayer key="radar-legacy" url={LEGACY_RADAR_TILE_URL} opacity={0.65} zIndex={3} attribution={OVERLAYS.radar.attribution} />
+        )
       ) : null}
       <Recenter center={center} zoom={zoom} />
       {interactive ? <Events onMoveEnd={onMoveEnd} onClick={onClick} /> : null}
+      {ov.radar && radarFrame ? (
+        <RadarTimeControl time={radarFrame.time} playing={radar.playing} onToggle={radar.togglePlay} />
+      ) : null}
 
       {history.map((h) => (
         <GeoJSON key={`hist-${h.id}`} data={feature(h.geojson)} style={HISTORY_PERIMETER_STYLE}>

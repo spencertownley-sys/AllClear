@@ -66,7 +66,7 @@ Everything AllClear shows comes from a public feed that needs no paid plan. Only
 | UV index | EPA Envirofacts UV daily forecast (by ZIP) | 6 h |
 | Tropical cyclones | NOAA NHC `CurrentStorms.json` | 30 min |
 | Basemaps | OpenStreetMap, USGS National Map imagery + topo tiles | — |
-| Radar overlay | Iowa Environmental Mesonet NEXRAD composite tiles | live |
+| Radar overlay | RainViewer worldwide Doppler mosaic (NWS NEXRAD + partner networks), animated last ~2h; falls back to Iowa Environmental Mesonet's CONUS NEXRAD composite | live, ~10 min |
 | Sea-surface temperature overlay | NOAA CoastWatch ERDDAP (JPL MUR) WMS | daily |
 | Live wildfire cameras | Link out to ALERTWildfire (no API) | — |
 

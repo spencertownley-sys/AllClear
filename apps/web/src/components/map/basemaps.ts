@@ -1,7 +1,7 @@
 /**
  * Free, key-less tile sources. Everything here is public and usable without an account:
  * OpenStreetMap (street), USGS The National Map (satellite imagery + topo),
- * Iowa Environmental Mesonet NEXRAD composite (radar) and NOAA CoastWatch ERDDAP (sea temperature).
+ * RainViewer's worldwide radar mosaic (radar; see ./radar.ts) and NOAA CoastWatch ERDDAP (sea temperature).
  */
 export const BASEMAP_IDS = ['street', 'satellite', 'topo'] as const;
 export type BasemapId = (typeof BASEMAP_IDS)[number];
@@ -46,8 +46,9 @@ export interface OverlayDef {
 export const OVERLAYS: Record<OverlayId, OverlayDef> = {
   radar: {
     label: 'Radar',
-    description: 'Live NEXRAD precipitation radar (refreshes about every 5 minutes).',
-    attribution: 'Radar &copy; <a href="https://mesonet.agron.iastate.edu/">Iowa Environmental Mesonet</a> / NWS NEXRAD',
+    description: 'Doppler radar mosaic with the last ~2 hours animated (refreshes about every 10 minutes).',
+    attribution:
+      'Radar &copy; <a href="https://www.rainviewer.com/">RainViewer</a> (NWS NEXRAD and partner networks); falls back to <a href="https://mesonet.agron.iastate.edu/">Iowa Environmental Mesonet</a> if unreachable',
   },
   sst: {
     label: 'Sea temp',
@@ -56,7 +57,6 @@ export const OVERLAYS: Record<OverlayId, OverlayDef> = {
   },
 };
 
-export const RADAR_TILE_URL = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png';
 export const SST_WMS_URL = 'https://coastwatch.pfeg.noaa.gov/erddap/wms/jplMURSST41/request?';
 export const SST_WMS_LAYER = 'jplMURSST41:analysed_sst';
 
