@@ -15,7 +15,7 @@ import {
 } from 'react-leaflet';
 import * as L from 'leaflet';
 import type { LatLngBoundsExpression } from 'leaflet';
-import type { GeoJsonGeometry, MapFireDTO, MapQuakeDTO, StormDTO } from '@allclear/shared';
+import type { GeoJsonGeometry, MapFireDTO, MapQuakeDTO, SmokeDensity, StormDTO } from '@allclear/shared';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import { BASEMAPS, DEFAULT_OVERLAYS, OVERLAYS, SST_WMS_LAYER, SST_WMS_URL, type BasemapId, type OverlayState } from './basemaps';
 import { LEGACY_RADAR_TILE_URL, radarFrameTileUrl } from './radar';
@@ -48,6 +48,13 @@ export interface HistoryPolygon {
   geojson: GeoJsonGeometry;
 }
 
+/** A satellite-observed smoke plume; both the public map DTO and the location-detail DTO satisfy this. */
+export interface SmokePolygon {
+  id: string;
+  density: SmokeDensity;
+  geojson: GeoJsonGeometry;
+}
+
 export interface HazardMapProps {
   center: [number, number];
   zoom: number;
@@ -55,6 +62,7 @@ export interface HazardMapProps {
   quakes?: MapQuakeDTO[];
   perimeters?: MapPolygon[];
   history?: HistoryPolygon[];
+  smoke?: SmokePolygon[];
   storms?: StormDTO[];
   pins?: MapPin[];
   basemap?: BasemapId;
@@ -160,6 +168,13 @@ function feature(geometry: GeoJsonGeometry): GeoJsonData {
 
 const ACTIVE_PERIMETER_STYLE = { color: '#b91c1c', weight: 2, fillColor: '#ef4444', fillOpacity: 0.22 };
 const HISTORY_PERIMETER_STYLE = { color: '#78716c', weight: 1.5, dashArray: '4 3', fillColor: '#a8a29e', fillOpacity: 0.16 };
+/** Grey, opacity scaling with density — never the only cue: every popup and legend entry names the density in text too. */
+const SMOKE_STYLE: Record<SmokeDensity, { color: string; fillColor: string; fillOpacity: number }> = {
+  light: { color: '#78716c', fillColor: '#a8a29e', fillOpacity: 0.12 },
+  medium: { color: '#57534e', fillColor: '#78716c', fillOpacity: 0.22 },
+  heavy: { color: '#44403c', fillColor: '#57534e', fillOpacity: 0.34 },
+};
+const SMOKE_DENSITY_TEXT: Record<SmokeDensity, string> = { light: 'Light smoke', medium: 'Medium smoke', heavy: 'Heavy smoke' };
 
 /**
  * Leaflet map with a switchable free basemap, optional radar / sea-temperature overlays,
@@ -172,6 +187,7 @@ export default function HazardMapInner({
   quakes = [],
   perimeters = [],
   history = [],
+  smoke = [],
   storms = [],
   pins = [],
   basemap = 'street',
@@ -243,6 +259,16 @@ export default function HazardMapInner({
             {h.acres ? `${formatNumber(Math.round(h.acres))} acres` : 'Size unknown'}
             <br />
             <span style={{ fontSize: 11 }}>Past fire · Source: NIFC fire history</span>
+          </Popup>
+        </GeoJSON>
+      ))}
+
+      {smoke.map((s) => (
+        <GeoJSON key={`smoke-${s.id}`} data={feature(s.geojson)} style={SMOKE_STYLE[s.density]}>
+          <Popup>
+            <strong>{SMOKE_DENSITY_TEXT[s.density]}</strong>
+            <br />
+            <span style={{ fontSize: 11 }}>Satellite smoke analysis · Source: NOAA/NESDIS (HMS)</span>
           </Popup>
         </GeoJSON>
       ))}

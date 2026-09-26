@@ -14,4 +14,4 @@ export function HazardMap(props: HazardMapProps) {
   return <HazardMapInner {...props} />;
 }
 
-export type { HazardMapProps, HistoryPolygon, MapPin, MapPolygon } from './hazard-map-inner';
+export type { HazardMapProps, HistoryPolygon, MapPin, MapPolygon, SmokePolygon } from './hazard-map-inner';

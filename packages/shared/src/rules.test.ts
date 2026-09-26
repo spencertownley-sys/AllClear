@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildNotificationSummary, eventMatchesRule, severityRank } from './rules';
+import { buildNotificationSummary, describeRuleCondition, eventMatchesRule, severityRank } from './rules';
 import type { NearbyHazardEvent, NotificationRule } from './types';
 
 const baseRule: NotificationRule = {
@@ -123,5 +123,15 @@ describe('severityRank', () => {
     expect(severityRank('Extreme')).toBeLessThan(severityRank('Severe'));
     expect(severityRank('Severe')).toBeLessThan(severityRank('Moderate'));
     expect(severityRank('Minor')).toBeLessThan(severityRank(null));
+  });
+});
+
+describe('describeRuleCondition', () => {
+  it('describes each condition type in plain language', () => {
+    expect(describeRuleCondition('wildfire', 'distance_threshold_miles', 25)).toBe('Wildfire rule: notify when a fire is within 25 mi');
+    expect(describeRuleCondition('earthquake', 'magnitude_threshold', 4.5)).toBe('Earthquake rule: notify for M4.5 or stronger');
+    expect(describeRuleCondition('air_quality', 'aqi_threshold', 101)).toBe('Air quality rule: notify when the AQI reaches 101');
+    expect(describeRuleCondition('official_alerts', 'any_active', null)).toBe('Official Alerts rule: notify on any active NWS alert');
+    expect(describeRuleCondition('weather', 'any_active', null)).toBe('Weather rule: notify on severe weather alerts (Severe or Extreme)');
   });
 });

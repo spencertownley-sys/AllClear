@@ -70,13 +70,13 @@ describe('mapQuerySchema', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.bbox.minLng).toBe(-125);
-      expect(result.data.layers).toEqual({ fires: true, quakes: false, perimeters: false, storms: false, history: false });
+      expect(result.data.layers).toEqual({ fires: true, quakes: false, perimeters: false, storms: false, history: false, smoke: false });
       expect(result.data.history_years).toBe(10);
     }
   });
   it('defaults to every layer', () => {
     const result = mapQuerySchema.safeParse({ bbox: '-125,24,-66,50' });
-    expect(result.success && result.data.layers).toEqual({ fires: true, quakes: true, perimeters: true, storms: true, history: false });
+    expect(result.success && result.data.layers).toEqual({ fires: true, quakes: true, perimeters: true, storms: true, history: false, smoke: false });
   });
   it('rejects a bad bbox', () => {
     expect(mapQuerySchema.safeParse({ bbox: 'nope' }).success).toBe(false);

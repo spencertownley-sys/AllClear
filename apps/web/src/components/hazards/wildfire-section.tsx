@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { Camera, Flame, History } from 'lucide-react';
-import { FIRE_HISTORY_YEAR_OPTIONS, formatMiles, type LocationHazardsResponse } from '@allclear/shared';
+import { Camera, CloudFog, Flame, History } from 'lucide-react';
+import { FIRE_HISTORY_YEAR_OPTIONS, formatMiles, type LocationHazardsResponse, type SafetyCheckinDTO } from '@allclear/shared';
 import { cn } from '@/lib/utils';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';
 import { HazardMap } from '@/components/map/hazard-map';
+import { SafetyCheckInButton } from '@/components/safety/safety-checkin-button';
 import { HazardSection } from './section';
 
 type Wildfire = NonNullable<LocationHazardsResponse['wildfire']>;
@@ -14,14 +15,17 @@ interface Props {
   center: { latitude: number; longitude: number; label: string };
   /** Page path the history range links resolve against (`?history_years=` is appended). */
   basePath: string;
+  locationId: string;
+  checkins: SafetyCheckinDTO[];
 }
 
 function acresLine(acres: number | null): string {
   return acres !== null ? `${formatNumber(Math.round(acres))} acres` : 'size unknown';
 }
 
-export function WildfireSection({ wildfire, center, basePath }: Props) {
-  const { hotspots, incidents, perimeters, history, history_years, cameras_url, radius_miles } = wildfire;
+export function WildfireSection({ wildfire, center, basePath, locationId, checkins }: Props) {
+  const { hotspots, incidents, perimeters, history, history_years, smoke, cameras_url, radius_miles } = wildfire;
+  const checkinByEvent = new Map(checkins.filter((c) => c.hazard_event_id).map((c) => [c.hazard_event_id as string, c]));
   const nothingActive = hotspots.length === 0 && incidents.length === 0 && perimeters.length === 0;
   const fires = [
     ...incidents.map((i) => ({
@@ -64,6 +68,7 @@ export function WildfireSection({ wildfire, center, basePath }: Props) {
               fires={fires}
               perimeters={perimeters}
               history={history}
+              smoke={smoke}
               pins={[{ latitude: center.latitude, longitude: center.longitude, label: center.label }]}
               interactive={false}
               className="h-64 w-full"
@@ -120,6 +125,14 @@ export function WildfireSection({ wildfire, center, basePath }: Props) {
                     {i.updated_at ? ` · updated ${formatDateTime(i.updated_at)}` : ''}
                   </p>
                   <p className="text-xs text-slate-500">Source: NIFC / InciWeb</p>
+                  <SafetyCheckInButton
+                    locationId={locationId}
+                    hazardEventId={i.id}
+                    eventType="fire_incident"
+                    eventTitle={i.name}
+                    initialCheckin={checkinByEvent.get(i.id) ?? null}
+                    className="mt-1"
+                  />
                 </li>
               ))}
             </ul>
@@ -134,6 +147,33 @@ export function WildfireSection({ wildfire, center, basePath }: Props) {
               Hotspots are automated heat detections and can include controlled burns, industrial sources or false positives.
             </span>
           </p>
+        ) : null}
+
+        {smoke.length > 0 ? (
+          <div>
+            <h4 className="mb-1 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <CloudFog className="h-3.5 w-3.5" aria-hidden /> Smoke plumes
+            </h4>
+            <ul className="divide-y divide-slate-100" aria-label="Satellite smoke plumes">
+              {smoke.map((s) => (
+                <li key={s.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-900">
+                      {s.density === 'heavy' ? 'Heavy' : s.density === 'medium' ? 'Medium' : 'Light'} smoke
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {s.satellite ? `${s.satellite} · ` : ''}
+                      {s.observed_at ? `observed ${formatDateTime(s.observed_at)}` : 'observation time unknown'}
+                    </p>
+                  </div>
+                  <span className="shrink-0 tabular-nums text-slate-700">{formatMiles(s.distance_miles)} away</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-xs text-slate-500">
+              Source: NOAA/NESDIS Hazard Mapping System — visual smoke analysis from GOES satellite imagery, updated through the day.
+            </p>
+          </div>
         ) : null}
 
         <div className="rounded-card border border-slate-200 bg-slate-50 p-3">

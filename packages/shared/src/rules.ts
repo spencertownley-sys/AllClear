@@ -1,4 +1,4 @@
-import { NWS_SEVERITY_ORDER, type ConditionType } from './constants';
+import { NWS_SEVERITY_ORDER, type ConditionType, type NotificationLayerType } from './constants';
 import { aqiCategory } from './aqi';
 import { formatMiles } from './geo';
 import type { CachedHazardEvent, NearbyHazardEvent, NotificationRule } from './types';
@@ -115,5 +115,36 @@ export function buildNotificationSummary(
     }
     default:
       return `${event.title} near ${locationLabel}`;
+  }
+}
+
+/**
+ * Human description of a notification rule's condition, independent of any specific event —
+ * used as the "why am I seeing this" explanation on a notification history item.
+ */
+export function describeRuleCondition(
+  layerType: NotificationLayerType,
+  conditionType: ConditionType,
+  thresholdValue: number | null,
+): string {
+  switch (conditionType) {
+    case 'distance_threshold_miles':
+      return thresholdValue !== null
+        ? `Wildfire rule: notify when a fire is within ${formatMiles(thresholdValue)}`
+        : 'Wildfire rule: notify on nearby fire activity';
+    case 'magnitude_threshold':
+      return thresholdValue !== null
+        ? `Earthquake rule: notify for M${thresholdValue.toFixed(1)} or stronger`
+        : 'Earthquake rule: notify on nearby earthquakes';
+    case 'aqi_threshold':
+      return thresholdValue !== null
+        ? `Air quality rule: notify when the AQI reaches ${Math.round(thresholdValue)}`
+        : 'Air quality rule: notify on elevated AQI';
+    case 'any_active':
+      return layerType === 'weather'
+        ? 'Weather rule: notify on severe weather alerts (Severe or Extreme)'
+        : 'Official Alerts rule: notify on any active NWS alert';
+    default:
+      return 'Matched one of your notification rules';
   }
 }

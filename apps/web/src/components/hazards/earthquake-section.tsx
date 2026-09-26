@@ -1,13 +1,21 @@
 import { Activity } from 'lucide-react';
-import { formatMiles, type LocationHazardsResponse } from '@allclear/shared';
+import { formatMiles, type LocationHazardsResponse, type SafetyCheckinDTO } from '@allclear/shared';
 import { formatDateTime } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';
+import { SafetyCheckInButton } from '@/components/safety/safety-checkin-button';
 import { HazardSection } from './section';
 
 type Quakes = NonNullable<LocationHazardsResponse['earthquakes']>;
 
-export function EarthquakeSection({ earthquakes }: { earthquakes: Quakes }) {
+interface Props {
+  earthquakes: Quakes;
+  locationId: string;
+  checkins: SafetyCheckinDTO[];
+}
+
+export function EarthquakeSection({ earthquakes, locationId, checkins }: Props) {
   const { events, radius_miles, min_magnitude } = earthquakes;
+  const checkinByEvent = new Map(checkins.filter((c) => c.hazard_event_id).map((c) => [c.hazard_event_id as string, c]));
   return (
     <HazardSection title="Earthquakes" source="usgs" stale={earthquakes.stale} icon={<Activity className="h-4 w-4" aria-hidden />} id="earthquakes">
       {events.length === 0 ? (
@@ -36,7 +44,16 @@ export function EarthquakeSection({ earthquakes }: { earthquakes: Quakes }) {
                 </p>
                 <p className="text-xs text-slate-500">{formatDateTime(q.occurred_at)}</p>
               </div>
-              <span className="shrink-0 tabular-nums text-slate-700">{formatMiles(q.distance_miles)} away</span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className="tabular-nums text-slate-700">{formatMiles(q.distance_miles)} away</span>
+                <SafetyCheckInButton
+                  locationId={locationId}
+                  hazardEventId={q.id}
+                  eventType="earthquake"
+                  eventTitle={`M${q.magnitude.toFixed(1)} — ${q.place}`}
+                  initialCheckin={checkinByEvent.get(q.id) ?? null}
+                />
+              </div>
             </li>
           ))}
         </ul>

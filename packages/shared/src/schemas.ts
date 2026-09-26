@@ -3,6 +3,7 @@ import {
   AQI_LIMITS,
   CHANNELS,
   CONDITION_TYPES,
+  EVENT_TYPES,
   LAYER_TYPES,
   MAGNITUDE_LIMITS,
   NOTIFICATION_LAYER_TYPES,
@@ -200,6 +201,7 @@ export const mapQuerySchema = z.object({
         perimeters: requested.includes('perimeters'),
         storms: requested.includes('storms'),
         history: requested.includes('history'),
+        smoke: requested.includes('smoke'),
       };
     }),
 });
@@ -236,3 +238,12 @@ export function zodIssuesToDetails(error: z.ZodError): Array<{ field: string; me
     message: issue.message,
   }));
 }
+
+/** Body for POSTing a personal "I'm safe" marker against a specific hazard event (private to the account). */
+export const createCheckinSchema = z.object({
+  hazard_event_id: z.uuid().nullable().optional(),
+  event_type: z.enum(EVENT_TYPES),
+  event_title: z.string().min(1).max(200),
+  note: z.string().max(280).optional(),
+});
+export type CreateCheckinInput = z.infer<typeof createCheckinSchema>;

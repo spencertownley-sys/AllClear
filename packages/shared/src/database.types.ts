@@ -324,6 +324,54 @@ export type Database = {
           },
         ];
       };
+      safety_checkins: {
+        Row: {
+          id: string;
+          user_id: string;
+          watch_location_id: string;
+          hazard_event_id: string | null;
+          event_type: string;
+          event_title: string;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          watch_location_id: string;
+          hazard_event_id?: string | null;
+          event_type: string;
+          event_title: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          watch_location_id?: string;
+          hazard_event_id?: string | null;
+          event_type?: string;
+          event_title?: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'safety_checkins_watch_location_id_fkey';
+            columns: ['watch_location_id'];
+            isOneToOne: false;
+            referencedRelation: 'watch_locations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'safety_checkins_hazard_event_id_fkey';
+            columns: ['hazard_event_id'];
+            isOneToOne: false;
+            referencedRelation: 'cached_hazard_events';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       push_subscriptions: {
         Row: {
           id: string;
@@ -562,7 +610,7 @@ export type Database = {
       condition_type: 'distance_threshold_miles' | 'magnitude_threshold' | 'aqi_threshold' | 'any_active';
       notification_channel: 'web_push' | 'email' | 'both';
       delivery_channel: 'web_push' | 'email';
-      hazard_source: 'nws' | 'firms' | 'inciweb' | 'usgs' | 'airnow' | 'epa' | 'nhc' | 'open_meteo' | 'cpc';
+      hazard_source: 'nws' | 'firms' | 'inciweb' | 'usgs' | 'airnow' | 'epa' | 'nhc' | 'open_meteo' | 'cpc' | 'nesdis';
     };
     CompositeTypes: Record<string, never>;
   };

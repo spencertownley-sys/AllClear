@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BellOff, Mail, Smartphone } from 'lucide-react';
-import { LAYER_LABELS, paginationSchema, type NotificationHistoryItemDTO } from '@allclear/shared';
+import { LAYER_LABELS, describeRuleCondition, paginationSchema, type NotificationHistoryItemDTO } from '@allclear/shared';
 import { createClient } from '@/lib/supabase/server';
 import { listNotifications } from '@/lib/data/notifications';
 import { formatDateTime } from '@/lib/format';
@@ -66,6 +66,16 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
                         {item.watch_location_label}
                         {item.layer_type ? ` · ${LAYER_LABELS[item.layer_type]}` : ''} · {formatDateTime(item.sent_at)}
                       </p>
+                      <details className="mt-1 text-xs">
+                        <summary className="inline-block cursor-pointer select-none text-primary underline-offset-2 hover:underline">
+                          Why am I seeing this?
+                        </summary>
+                        <p className="mt-1 text-slate-600">
+                          {item.layer_type && item.condition_type
+                            ? describeRuleCondition(item.layer_type, item.condition_type, item.threshold_value)
+                            : 'The rule that triggered this notification has since been removed or changed.'}
+                        </p>
+                      </details>
                     </div>
                   </li>
                 ))}

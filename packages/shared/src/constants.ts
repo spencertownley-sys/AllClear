@@ -24,7 +24,7 @@ export type Channel = (typeof CHANNELS)[number];
 export const DELIVERY_CHANNELS = ['web_push', 'email'] as const;
 export type DeliveryChannel = (typeof DELIVERY_CHANNELS)[number];
 
-export const HAZARD_SOURCES = ['nws', 'firms', 'inciweb', 'usgs', 'airnow', 'epa', 'nhc', 'open_meteo', 'cpc'] as const;
+export const HAZARD_SOURCES = ['nws', 'firms', 'inciweb', 'usgs', 'airnow', 'epa', 'nhc', 'open_meteo', 'cpc', 'nesdis'] as const;
 export type HazardSource = (typeof HAZARD_SOURCES)[number];
 
 export const EVENT_TYPES = [
@@ -33,12 +33,22 @@ export const EVENT_TYPES = [
   'fire_incident',
   'fire_perimeter',
   'fire_perimeter_historical',
+  'smoke_plume',
   'earthquake',
   'aqi_reading',
   'uv_index',
   'tropical_cyclone',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
+
+/** NOAA/NESDIS Hazard Mapping System qualitative smoke density. */
+export const SMOKE_DENSITIES = ['light', 'medium', 'heavy'] as const;
+export type SmokeDensity = (typeof SMOKE_DENSITIES)[number];
+export const SMOKE_DENSITY_LABELS: Record<SmokeDensity, string> = {
+  light: 'Light smoke',
+  medium: 'Medium smoke',
+  heavy: 'Heavy smoke',
+};
 
 /** Human-readable label for every data source, shown on every card ("Source: NWS"). */
 export const SOURCE_LABELS: Record<HazardSource, string> = {
@@ -51,6 +61,7 @@ export const SOURCE_LABELS: Record<HazardSource, string> = {
   nhc: 'NOAA NHC',
   open_meteo: 'Open-Meteo',
   cpc: 'NOAA CPC',
+  nesdis: 'NOAA/NESDIS (HMS)',
 };
 
 export const LAYER_LABELS: Record<NotificationLayerType, string> = {
@@ -112,6 +123,7 @@ export const SOURCE_STALE_AFTER_MS: Record<HazardSource, number> = {
   nhc: 2 * 60 * 60 * 1000,
   open_meteo: 4 * 60 * 60 * 1000,
   cpc: 30 * 60 * 60 * 1000,
+  nesdis: 3 * 60 * 60 * 1000,
 };
 
 /** Days of daily forecast shown (NWS covers the first 7, Open-Meteo the rest). */

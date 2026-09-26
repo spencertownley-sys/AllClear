@@ -16,7 +16,7 @@ export async function listNotifications(
   const to = from + limit - 1;
   const { data, error, count } = await supabase
     .from('notifications_log')
-    .select('id, layer_type, summary, channel, sent_at, watch_locations(label)', { count: 'exact' })
+    .select('id, layer_type, summary, channel, sent_at, watch_locations(label), notification_rules(condition_type, threshold_value)', { count: 'exact' })
     .order('sent_at', { ascending: false })
     .range(from, to);
   if (error) {
@@ -27,6 +27,7 @@ export async function listNotifications(
     data: (data ?? []).map((row) => {
       const location = row.watch_locations;
       const label = location?.label;
+      const rule = row.notification_rules;
       return {
         id: row.id,
         watch_location_label: label ?? 'Removed location',
@@ -34,6 +35,8 @@ export async function listNotifications(
         summary: row.summary,
         channel: row.channel,
         sent_at: row.sent_at,
+        condition_type: rule?.condition_type ?? null,
+        threshold_value: rule?.threshold_value ?? null,
       };
     }),
     meta: { page, limit, total: count ?? 0 },

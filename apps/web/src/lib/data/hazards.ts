@@ -20,6 +20,8 @@ import {
   type LocationHazardsResponse,
   type OfficialAlertDTO,
   type PerimeterDTO,
+  type SmokeDensity,
+  type SmokePlumeDTO,
   type StormDTO,
   type UvDTO,
   type WatchLocation,
@@ -100,6 +102,20 @@ function toHistoricalFireDTO(row: PolygonRow): HistoricalFireDTO {
     name: row.title,
     year: num(a.year),
     acres: num(a.acres),
+    distance_miles: row.distance_miles,
+    geojson: row.geojson as GeoJsonGeometry,
+    source: row.source,
+  };
+}
+
+function toSmokeDTO(row: PolygonRow): SmokePlumeDTO {
+  const a = pattrs(row);
+  return {
+    id: row.id,
+    density: (typeof a.density === 'string' ? a.density : 'light') as SmokeDensity,
+    satellite: str(a.satellite),
+    observed_at: str(a.start_at),
+    valid_until: str(a.end_at),
     distance_miles: row.distance_miles,
     geojson: row.geojson as GeoJsonGeometry,
     source: row.source,
@@ -317,7 +333,7 @@ export async function loadWildfire(
   historyYears: number = FIRE_HISTORY_YEARS,
 ): Promise<NonNullable<LocationHazardsResponse['wildfire']>> {
   const minYear = new Date().getUTCFullYear() - historyYears;
-  const [fires, perimeters, history] = await Promise.all([
+  const [fires, perimeters, history, smoke] = await Promise.all([
     rpcRows<HazardRow>(
       supabase.rpc('hazards_near', {
         p_lat: ctx.lat,
@@ -343,12 +359,17 @@ export async function loadWildfire(
       }),
       'fire history',
     ),
+    rpcRows<PolygonRow>(
+      supabase.rpc('perimeters_near', { p_lat: ctx.lat, p_lng: ctx.lng, p_radius_miles: ctx.wildfireRadius, p_event_types: ['smoke_plume'], p_limit: 15, p_min_year: null }),
+      'smoke plumes',
+    ),
   ]);
   return {
     hotspots: fires.filter((r) => r.event_type === 'fire_hotspot').map(toHotspotDTO),
     incidents: fires.filter((r) => r.event_type === 'fire_incident').map(toIncidentDTO),
     perimeters: perimeters.map(toPerimeterDTO),
     history: history.map(toHistoricalFireDTO).sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || (b.acres ?? 0) - (a.acres ?? 0)),
+    smoke: smoke.map(toSmokeDTO),
     history_years: historyYears,
     cameras_url: CAMERA_NETWORK_URL,
     radius_miles: ctx.wildfireRadius,

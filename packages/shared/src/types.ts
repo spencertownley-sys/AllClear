@@ -6,6 +6,7 @@ import type {
   HazardSource,
   LayerType,
   NotificationLayerType,
+  SmokeDensity,
 } from './constants';
 
 // ---------- Database rows ----------
@@ -309,6 +310,18 @@ export interface HistoricalFireDTO {
   source: HazardSource;
 }
 
+/** A satellite-observed smoke plume near a Watch Location (NOAA/NESDIS Hazard Mapping System). */
+export interface SmokePlumeDTO {
+  id: string;
+  density: SmokeDensity;
+  satellite: string | null;
+  observed_at: string | null;
+  valid_until: string | null;
+  distance_miles: number;
+  geojson: GeoJsonGeometry;
+  source: HazardSource;
+}
+
 export interface StormDTO {
   id: string;
   name: string;
@@ -374,6 +387,8 @@ export interface LocationHazardsResponse {
     history: HistoricalFireDTO[];
     /** How many years back `history` covers (user-selectable, capped by FIRE_HISTORY_MAX_YEARS). */
     history_years: number;
+    /** Satellite-observed smoke plumes within the location's radius (NOAA/NESDIS HMS). */
+    smoke: SmokePlumeDTO[];
     cameras_url: string;
     radius_miles: number;
     stale: boolean;
@@ -430,6 +445,14 @@ export interface MapHistoryDTO {
   source: HazardSource;
 }
 
+/** A satellite-observed smoke plume on the public map (no distance; the viewport is the filter). */
+export interface MapSmokePlumeDTO {
+  id: string;
+  density: SmokeDensity;
+  geojson: GeoJsonGeometry;
+  source: HazardSource;
+}
+
 export interface MapResponse {
   data: {
     fires: MapFireDTO[];
@@ -437,6 +460,7 @@ export interface MapResponse {
     perimeters: MapPerimeterDTO[];
     storms: StormDTO[];
     history: MapHistoryDTO[];
+    smoke: MapSmokePlumeDTO[];
   };
   meta: {
     fires_updated_at: string | null;
@@ -444,6 +468,7 @@ export interface MapResponse {
     perimeters_updated_at: string | null;
     storms_updated_at: string | null;
     history_updated_at: string | null;
+    smoke_updated_at: string | null;
     /** Echo of the look-back applied to `history`. */
     history_years: number;
   };
@@ -466,6 +491,20 @@ export interface NotificationHistoryItemDTO {
   summary: string;
   channel: DeliveryChannel;
   sent_at: string;
+  /** The rule that triggered this notification, when it's still configured (null if since deleted). */
+  condition_type: ConditionType | null;
+  threshold_value: number | null;
+}
+
+/** A user's personal "I'm safe" marker against a specific hazard event. Private to the account — never shared. */
+export interface SafetyCheckinDTO {
+  id: string;
+  watch_location_id: string;
+  hazard_event_id: string | null;
+  event_type: EventType;
+  event_title: string;
+  note: string | null;
+  created_at: string;
 }
 
 export interface DashboardSummaryRow {

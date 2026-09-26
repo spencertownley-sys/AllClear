@@ -1,5 +1,5 @@
 import 'server-only';
-import { ApiError, FIRE_HISTORY_YEARS, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapHistoryDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type StormDTO } from '@allclear/shared';
+import { ApiError, FIRE_HISTORY_YEARS, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapHistoryDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type MapSmokePlumeDTO, type SmokeDensity, type StormDTO } from '@allclear/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 type BboxRow = {
@@ -58,7 +58,7 @@ async function fetchPolygons(
 export async function getMapData(
   supabase: ServerSupabaseClient,
   bbox: BBox,
-  layers: { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean; history: boolean },
+  layers: { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean; history: boolean; smoke: boolean },
   historyYears: number = FIRE_HISTORY_YEARS,
 ): Promise<MapResponse> {
   const types: string[] = [];
@@ -70,6 +70,7 @@ export async function getMapData(
   // Largest fires first (the RPC orders by acres), so a national view shows the big ones and zooming in fills in the rest.
   const minYear = new Date().getUTCFullYear() - historyYears;
   const historyPromise: Promise<PolyRow[]> = layers.history ? fetchPolygons(supabase, bbox, ['fire_perimeter_historical'], 400, minYear) : Promise.resolve([]);
+  const smokePromise: Promise<PolyRow[]> = layers.smoke ? fetchPolygons(supabase, bbox, ['smoke_plume'], 400, null) : Promise.resolve([]);
 
   const rows: BboxRow[] = types.length
     ? await (async () => {
@@ -89,7 +90,7 @@ export async function getMapData(
       })()
     : [];
 
-  const [polygons, historyRows] = await Promise.all([polygonsPromise, historyPromise]);
+  const [polygons, historyRows, smokeRows] = await Promise.all([polygonsPromise, historyPromise, smokePromise]);
   const fires: MapFireDTO[] = [];
   const quakes: MapQuakeDTO[] = [];
   const storms: StormDTO[] = [];
@@ -98,6 +99,7 @@ export async function getMapData(
   let stormsUpdated: string | null = null;
   let perimetersUpdated: string | null = null;
   let historyUpdated: string | null = null;
+  let smokeUpdated: string | null = null;
 
   const history: MapHistoryDTO[] = historyRows.map((row) => {
     const attrs = a(row);
@@ -107,6 +109,17 @@ export async function getMapData(
       name: row.title,
       year: typeof attrs.year === 'number' ? attrs.year : null,
       acres: typeof attrs.acres === 'number' ? attrs.acres : null,
+      geojson: row.geojson as GeoJsonGeometry,
+      source: row.source,
+    };
+  });
+
+  const smoke: MapSmokePlumeDTO[] = smokeRows.map((row) => {
+    const attrs = a(row);
+    if (!smokeUpdated || row.fetched_at > smokeUpdated) smokeUpdated = row.fetched_at;
+    return {
+      id: row.id,
+      density: (typeof attrs.density === 'string' ? attrs.density : 'light') as SmokeDensity,
       geojson: row.geojson as GeoJsonGeometry,
       source: row.source,
     };
@@ -178,10 +191,11 @@ export async function getMapData(
   }
 
   return {
-    data: { fires, quakes, perimeters, storms, history },
+    data: { fires, quakes, perimeters, storms, history, smoke },
     meta: { fires_updated_at: firesUpdated, quakes_updated_at: quakesUpdated, perimeters_updated_at: perimetersUpdated, storms_updated_at: stormsUpdated,
       history_updated_at: historyUpdated,
       history_years: historyYears,
+      smoke_updated_at: smokeUpdated,
     },
   };
 }

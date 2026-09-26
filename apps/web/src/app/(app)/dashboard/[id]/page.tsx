@@ -8,6 +8,7 @@ import { createClient, type ServerSupabaseClient } from '@/lib/supabase/server';
 import { getOwnedLocation, toLocationDTO } from '@/lib/data/locations';
 import { getLayers } from '@/lib/data/layers';
 import { layerContext, loadAirQuality, loadAlerts, loadEarthquakes, loadStorms, loadWeather, loadWildfire } from '@/lib/data/hazards';
+import { listCheckins } from '@/lib/data/safety';
 import { placeLine } from '@/lib/format';
 import { PageHeader } from '@/components/ui/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -47,23 +48,27 @@ async function Storms({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: 
   return <StormsNotice storms={await loadStorms(supabase, ctx)} />;
 }
 async function Wildfire({ supabase, ctx, location, historyYears }: { supabase: ServerSupabaseClient; ctx: Ctx; location: WatchLocation; historyYears: number }) {
-  const wildfire = await loadWildfire(supabase, ctx, historyYears);
+  const [wildfire, checkins] = await Promise.all([loadWildfire(supabase, ctx, historyYears), listCheckins(supabase, location.id)]);
   return (
     <WildfireSection
       wildfire={wildfire}
       center={{ latitude: ctx.lat, longitude: ctx.lng, label: location.label }}
       basePath={`/dashboard/${location.id}`}
+      locationId={location.id}
+      checkins={checkins}
     />
   );
 }
-async function Earthquakes({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: Ctx }) {
-  return <EarthquakeSection earthquakes={await loadEarthquakes(supabase, ctx)} />;
+async function Earthquakes({ supabase, ctx, location }: { supabase: ServerSupabaseClient; ctx: Ctx; location: WatchLocation }) {
+  const [earthquakes, checkins] = await Promise.all([loadEarthquakes(supabase, ctx), listCheckins(supabase, location.id)]);
+  return <EarthquakeSection earthquakes={earthquakes} locationId={location.id} checkins={checkins} />;
 }
 async function AirQuality({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: Ctx }) {
   return <AirQualitySection airQuality={await loadAirQuality(supabase, ctx)} />;
 }
-async function Alerts({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: Ctx }) {
-  return <AlertsSection alerts={await loadAlerts(supabase, ctx)} />;
+async function Alerts({ supabase, ctx, location }: { supabase: ServerSupabaseClient; ctx: Ctx; location: WatchLocation }) {
+  const [alerts, checkins] = await Promise.all([loadAlerts(supabase, ctx), listCheckins(supabase, location.id)]);
+  return <AlertsSection alerts={alerts} locationId={location.id} checkins={checkins} />;
 }
 async function AlertBanner({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: Ctx }) {
   const alerts = await loadAlerts(supabase, ctx);
@@ -132,7 +137,7 @@ export default async function LocationDetailPage({ params, searchParams }: Param
         {ctx.cfg.earthquake.enabled ? (
           <SectionErrorBoundary label="earthquake data">
             <Suspense fallback={<SectionSkeleton />}>
-              <Earthquakes supabase={supabase} ctx={ctx} />
+              <Earthquakes supabase={supabase} ctx={ctx} location={location} />
             </Suspense>
           </SectionErrorBoundary>
         ) : null}
@@ -145,7 +150,7 @@ export default async function LocationDetailPage({ params, searchParams }: Param
         ) : null}
         <SectionErrorBoundary label="official alerts">
           <Suspense fallback={<SectionSkeleton />}>
-            <Alerts supabase={supabase} ctx={ctx} />
+            <Alerts supabase={supabase} ctx={ctx} location={location} />
           </Suspense>
         </SectionErrorBoundary>
       </div>

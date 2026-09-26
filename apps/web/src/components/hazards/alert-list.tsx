@@ -1,13 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { ALERT_CATEGORY_LABELS, alertCategory, type AlertCategory, type OfficialAlertDTO } from '@allclear/shared';
+import { ALERT_CATEGORY_LABELS, alertCategory, type AlertCategory, type OfficialAlertDTO, type SafetyCheckinDTO } from '@allclear/shared';
 import { formatDateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { SafetyCheckInButton } from '@/components/safety/safety-checkin-button';
 import { SeverityBadge, alertClass } from './severity-badge';
 
+/** Categories serious enough to offer a personal "mark myself safe" marker (a tornado, wildfire, flood or tropical alert). */
+const CHECKIN_CATEGORIES: ReadonlySet<AlertCategory> = new Set(['fire', 'storm', 'tropical', 'flood']);
+
+interface Props {
+  alerts: OfficialAlertDTO[];
+  locationId: string;
+  checkins: SafetyCheckinDTO[];
+}
+
 /** Category chips (Flood / Fire / Wind / …) that filter the active alert list; "All" is always available. */
-export function AlertList({ alerts }: { alerts: OfficialAlertDTO[] }) {
+export function AlertList({ alerts, locationId, checkins }: Props) {
+  const checkinByEvent = new Map(checkins.filter((c) => c.hazard_event_id).map((c) => [c.hazard_event_id as string, c]));
   const [filter, setFilter] = useState<AlertCategory | 'all'>('all');
   const counts = new Map<AlertCategory, number>();
   for (const a of alerts) {
@@ -71,6 +82,16 @@ export function AlertList({ alerts }: { alerts: OfficialAlertDTO[] }) {
                 {a.sender ? `${a.sender} · ` : ''}
                 {a.expires_at ? `expires ${formatDateTime(a.expires_at)}` : ''}
               </p>
+              {CHECKIN_CATEGORIES.has(category) ? (
+                <SafetyCheckInButton
+                  locationId={locationId}
+                  hazardEventId={a.id}
+                  eventType="severe_alert"
+                  eventTitle={a.event}
+                  initialCheckin={checkinByEvent.get(a.id) ?? null}
+                  className="mt-2"
+                />
+              ) : null}
             </li>
           );
         })}

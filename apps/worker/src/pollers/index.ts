@@ -9,6 +9,7 @@ import { nifcPerimetersPoller } from './nifc-perimeters';
 import { nwsAlertsPoller } from './nws-alerts';
 import { nwsWeatherPoller } from './nws-weather';
 import { openMeteoPoller } from './open-meteo';
+import { smokePoller } from './smoke';
 import { usgsPoller } from './usgs';
 import type { Poller } from './types';
 
@@ -21,6 +22,7 @@ export const pollers: Poller[] = [
   firmsPoller,
   nifcPoller,
   nifcPerimetersPoller,
+  smokePoller,
   nhcPoller,
   airnowPoller,
   epaUvPoller,
