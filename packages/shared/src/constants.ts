@@ -24,7 +24,7 @@ export type Channel = (typeof CHANNELS)[number];
 export const DELIVERY_CHANNELS = ['web_push', 'email'] as const;
 export type DeliveryChannel = (typeof DELIVERY_CHANNELS)[number];
 
-export const HAZARD_SOURCES = ['nws', 'firms', 'inciweb', 'usgs', 'airnow', 'epa', 'nhc'] as const;
+export const HAZARD_SOURCES = ['nws', 'firms', 'inciweb', 'usgs', 'airnow', 'epa', 'nhc', 'open_meteo', 'cpc'] as const;
 export type HazardSource = (typeof HAZARD_SOURCES)[number];
 
 export const EVENT_TYPES = [
@@ -49,6 +49,8 @@ export const SOURCE_LABELS: Record<HazardSource, string> = {
   airnow: 'AirNow',
   epa: 'EPA',
   nhc: 'NOAA NHC',
+  open_meteo: 'Open-Meteo',
+  cpc: 'NOAA CPC',
 };
 
 export const LAYER_LABELS: Record<NotificationLayerType, string> = {
@@ -108,7 +110,12 @@ export const SOURCE_STALE_AFTER_MS: Record<HazardSource, number> = {
   airnow: 2 * 60 * 60 * 1000,
   epa: 26 * 60 * 60 * 1000,
   nhc: 2 * 60 * 60 * 1000,
+  open_meteo: 4 * 60 * 60 * 1000,
+  cpc: 30 * 60 * 60 * 1000,
 };
+
+/** Days of daily forecast shown (NWS covers the first 7, Open-Meteo the rest). */
+export const FORECAST_DAYS = 16;
 
 /** NWS CAP severity ordering, most severe first. */
 export const NWS_SEVERITY_ORDER = ['Extreme', 'Severe', 'Moderate', 'Minor', 'Unknown'] as const;
@@ -119,7 +126,8 @@ export const CELL_SIZE_DEG = {
   weather: 0.05, // ~3.5 mi — NWS gridpoints are 2.5 km
   alerts: 0.1, // ~7 mi
   aqi: 0.1, // AirNow "current by lat/long" already searches within 25 mi
-  history: 0.5, // ~35 mi — 10-year fire perimeter history is fetched per coarse cell
+  history: 0.5, // ~35 mi — fire perimeter history is fetched per coarse cell
+  outlook: 1, // ~70 mi — CPC outlook polygons are regional, one lookup covers many weather cells
 } as const;
 
 /** How often a rule may notify again. `null` = every new event (subject to per-event de-duplication). */

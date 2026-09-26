@@ -3,7 +3,7 @@
  * Regenerate with `supabase gen types typescript --local` once a project is linked,
  * and keep this file in sync.
  */
-import type { WeatherCurrent, WeatherDaily, WeatherHourly } from './types';
+import type { WeatherCurrent, WeatherDaily, WeatherHourly, WeatherOutlook } from './types';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -218,6 +218,11 @@ export type Database = {
           source: Database['public']['Enums']['hazard_source'];
           fetched_at: string;
           expires_at: string | null;
+          extended_hourly: WeatherHourly[] | null;
+          extended_daily: WeatherDaily[] | null;
+          extended_fetched_at: string | null;
+          outlook: WeatherOutlook | null;
+          outlook_fetched_at: string | null;
         };
         Insert: {
           id?: string;
@@ -233,6 +238,11 @@ export type Database = {
           source?: Database['public']['Enums']['hazard_source'];
           fetched_at?: string;
           expires_at?: string | null;
+          extended_hourly?: WeatherHourly[] | null;
+          extended_daily?: WeatherDaily[] | null;
+          extended_fetched_at?: string | null;
+          outlook?: WeatherOutlook | null;
+          outlook_fetched_at?: string | null;
         };
         Update: {
           id?: string;
@@ -248,6 +258,11 @@ export type Database = {
           source?: Database['public']['Enums']['hazard_source'];
           fetched_at?: string;
           expires_at?: string | null;
+          extended_hourly?: WeatherHourly[] | null;
+          extended_daily?: WeatherDaily[] | null;
+          extended_fetched_at?: string | null;
+          outlook?: WeatherOutlook | null;
+          outlook_fetched_at?: string | null;
         };
         Relationships: [];
       };
@@ -468,6 +483,11 @@ export type Database = {
           source: Database['public']['Enums']['hazard_source'];
           fetched_at: string;
           expires_at: string | null;
+          extended_hourly: WeatherHourly[] | null;
+          extended_daily: WeatherDaily[] | null;
+          extended_fetched_at: string | null;
+          outlook: WeatherOutlook | null;
+          outlook_fetched_at: string | null;
           distance_miles: number;
         }>;
       };
@@ -542,7 +562,7 @@ export type Database = {
       condition_type: 'distance_threshold_miles' | 'magnitude_threshold' | 'aqi_threshold' | 'any_active';
       notification_channel: 'web_push' | 'email' | 'both';
       delivery_channel: 'web_push' | 'email';
-      hazard_source: 'nws' | 'firms' | 'inciweb' | 'usgs' | 'airnow' | 'epa' | 'nhc';
+      hazard_source: 'nws' | 'firms' | 'inciweb' | 'usgs' | 'airnow' | 'epa' | 'nhc' | 'open_meteo' | 'cpc';
     };
     CompositeTypes: Record<string, never>;
   };

@@ -80,6 +80,8 @@ export function normalizeHourly(periods: NwsPeriod[]): WeatherHourly[] {
     icon: p.icon ?? null,
     wind_mph: parseWindMph(p.windSpeed),
     wind_dir: p.windDirection ?? null,
+    humidity_pct: p.relativeHumidity?.value ?? null,
+    source: 'nws',
   }));
 }
 

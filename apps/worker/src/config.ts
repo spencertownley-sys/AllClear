@@ -27,6 +27,8 @@ const schema = z.object({
   POLL_NIFC_HISTORY_MINUTES: minutes(1440),
   POLL_NHC_MINUTES: minutes(30),
   POLL_EPA_UV_MINUTES: minutes(360),
+  POLL_OPEN_METEO_MINUTES: minutes(180),
+  POLL_CPC_MINUTES: minutes(720),
   NIFC_PERIMETERS_URL: z.string().optional(),
   NIFC_HISTORY_URL: z.string().optional(),
   /** Bounding box polled from FIRMS: US incl. Alaska, Hawaii and Puerto Rico. */

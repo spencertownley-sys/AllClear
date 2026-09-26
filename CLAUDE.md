@@ -17,7 +17,7 @@ Non-goals for MVP: scanner audio, AI risk summaries, native apps, non-US weather
 
 ## Rules that must hold
 
-1. **Never call an external hazard API from a user request.** Reads come from the caches only. Only the worker talks to NWS/FIRMS/USGS/AirNow/NIFC/NHC/EPA. Map tiles and overlays (OSM, USGS, NEXRAD, ERDDAP) are the one exception: the browser loads them directly because they are public, key-less image tiles.
+1. **Never call an external hazard API from a user request.** Reads come from the caches only. Only the worker talks to NWS/FIRMS/USGS/AirNow/NIFC/NHC/EPA/Open-Meteo/CPC. Map tiles and overlays (OSM, USGS, NEXRAD, ERDDAP) are the one exception: the browser loads them directly because they are public, key-less image tiles.
 2. **Every API response uses the error envelope in API Design §8** — go through `withErrorHandling` and throw `ApiError`.
 3. **Validate every input server-side with the Zod schemas in `packages/shared`** (lat/lng bounds, threshold ranges, layer/condition combinations).
 4. **RLS is the authorization model.** User-owned tables are scoped by `auth.uid()`; the caches are public read-only; only the service role writes caches. Don't bypass RLS in web routes except through `getAdminClient()` for the two documented cases (account deletion, 403-vs-404 ownership check).

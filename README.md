@@ -54,7 +54,9 @@ Everything AllClear shows comes from a public feed that needs no paid plan. Only
 
 | What | Feed | Cadence |
 | --- | --- | --- |
-| Official alerts, forecasts, observations | NWS `api.weather.gov` | 5–15 min |
+| Official alerts, forecasts (7-day), observations | NWS `api.weather.gov` | 5–15 min |
+| 16-day daily + hour-by-hour forecast | Open-Meteo (no key; non-commercial use) | 3 h |
+| 6–10 and 8–14 day temperature / precipitation outlooks | NOAA Climate Prediction Center map services | 12 h |
 | Satellite fire hotspots | NASA FIRMS (key) | 15 min |
 | Named incidents | NIFC WFIGS incident locations (InciWeb RSS fallback) | 15 min |
 | Active fire perimeters | NIFC WFIGS interagency perimeters | 20 min |

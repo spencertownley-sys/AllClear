@@ -97,6 +97,11 @@ export interface WeatherHourly {
   icon: string | null;
   wind_mph: number | null;
   wind_dir: string | null;
+  /** Optional extras (present on Open-Meteo rows and newer NWS rows). */
+  precip_in?: number | null;
+  humidity_pct?: number | null;
+  wind_gust_mph?: number | null;
+  source?: HazardSource;
 }
 
 export interface WeatherDaily {
@@ -108,6 +113,43 @@ export interface WeatherDaily {
   precip_pct: number | null;
   icon: string | null;
   detailed: string | null;
+  /** Optional extras (present on Open-Meteo rows). */
+  precip_in?: number | null;
+  wind_mph?: number | null;
+  wind_gust_mph?: number | null;
+  sunrise?: string | null;
+  sunset?: string | null;
+  uv_max?: number | null;
+  source?: HazardSource;
+}
+
+/** One NOAA Climate Prediction Center outlook window (6–10 or 8–14 days out). */
+export interface WeatherOutlookPeriod {
+  key: '6-10' | '8-14';
+  label: string;
+  start_date: string;
+  end_date: string;
+  temperature: { category: string; probability: number | null } | null;
+  precipitation: { category: string; probability: number | null } | null;
+}
+
+export interface WeatherOutlook {
+  periods: WeatherOutlookPeriod[];
+  issued_at: string | null;
+}
+
+/** A week (or remainder) of the daily forecast rolled up for the "by week" view. */
+export interface WeeklySummary {
+  label: string;
+  start_date: string;
+  end_date: string;
+  days: number;
+  avg_high_f: number | null;
+  avg_low_f: number | null;
+  total_precip_in: number | null;
+  max_precip_pct: number | null;
+  max_wind_mph: number | null;
+  conditions: string;
 }
 
 export interface CachedWeather {
@@ -124,6 +166,11 @@ export interface CachedWeather {
   source: HazardSource;
   fetched_at: string;
   expires_at: string | null;
+  extended_hourly: WeatherHourly[] | null;
+  extended_daily: WeatherDaily[] | null;
+  extended_fetched_at: string | null;
+  outlook: WeatherOutlook | null;
+  outlook_fetched_at: string | null;
 }
 
 export interface NotificationLogEntry {
@@ -196,11 +243,20 @@ export interface UvDTO {
 
 export interface WeatherDTO {
   current: (WeatherCurrent & { source: HazardSource; fetched_at: string }) | null;
+  /** Hour by hour: NWS for the first day, Open-Meteo beyond, up to 16 days. */
   hourly: WeatherHourly[];
+  /** Day by day: NWS for the first 7 days, Open-Meteo through day 16. */
   daily: WeatherDaily[];
+  /** Week-by-week roll-ups of `daily`. */
+  weeks: WeeklySummary[];
+  /** NOAA CPC 6–10 and 8–14 day outlooks, when available for this place. */
+  outlook: WeatherOutlook | null;
   source: HazardSource;
   fetched_at: string | null;
   stale: boolean;
+  extended_fetched_at: string | null;
+  extended_stale: boolean;
+  outlook_fetched_at: string | null;
   uv: UvDTO | null;
 }
 

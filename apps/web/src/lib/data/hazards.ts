@@ -23,10 +23,13 @@ import {
   type StormDTO,
   type UvDTO,
   type WatchLocation,
+  type WeatherDaily,
   type WeatherDTO,
+  type WeatherHourly,
 } from '@allclear/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 import { layerMap } from './layers';
+import { mergeDaily, mergeHourly, weeklySummaries } from './weather-merge';
 
 type HazardRow = {
   id: string;
@@ -59,7 +62,7 @@ function num(value: unknown): number | null {
 
 type PolygonRow = {
   id: string;
-  source: 'nws' | 'firms' | 'inciweb' | 'usgs' | 'airnow' | 'epa' | 'nhc';
+  source: HazardSource;
   external_id: string;
   event_type: string;
   title: string;
@@ -262,14 +265,40 @@ export async function loadWeather(supabase: ServerSupabaseClient, ctx: LayerCont
   }
   const uv = uvRows[0] ? toUvDTO(uvRows[0]) : null;
   const row = Array.isArray(data) ? data[0] : undefined;
-  if (!row) return { current: null, hourly: [], daily: [], source: 'nws', fetched_at: null, stale: true, uv };
+  if (!row) {
+    return {
+      current: null,
+      hourly: [],
+      daily: [],
+      weeks: [],
+      outlook: null,
+      source: 'nws',
+      fetched_at: null,
+      stale: true,
+      extended_fetched_at: null,
+      extended_stale: true,
+      outlook_fetched_at: null,
+      uv,
+    };
+  }
+  const nwsHourly: WeatherHourly[] = (Array.isArray(row.hourly) ? row.hourly : []).map((h) => ({ ...h, source: h.source ?? 'nws' }));
+  const nwsDaily: WeatherDaily[] = (Array.isArray(row.daily) ? row.daily : []).map((d) => ({ ...d, source: d.source ?? 'nws' }));
+  const extHourly: WeatherHourly[] = Array.isArray(row.extended_hourly) ? row.extended_hourly : [];
+  const extDaily: WeatherDaily[] = Array.isArray(row.extended_daily) ? row.extended_daily : [];
+  const hourly = mergeHourly(nwsHourly, extHourly);
+  const daily = mergeDaily(nwsDaily, extDaily);
   return {
     current: row.current ? { ...row.current, source: row.source, fetched_at: row.fetched_at } : null,
-    hourly: Array.isArray(row.hourly) ? row.hourly : [],
-    daily: Array.isArray(row.daily) ? row.daily : [],
+    hourly,
+    daily,
+    weeks: weeklySummaries(daily),
+    outlook: row.outlook ?? null,
     source: row.source,
     fetched_at: row.fetched_at,
     stale: isStale(row.source, row.fetched_at),
+    extended_fetched_at: row.extended_fetched_at ?? null,
+    extended_stale: row.extended_fetched_at ? isStale('open_meteo', row.extended_fetched_at) : extHourly.length > 0,
+    outlook_fetched_at: row.outlook_fetched_at ?? null,
     uv,
   };
 }
