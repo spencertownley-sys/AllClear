@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/server';
  */
 export const GET = withErrorHandling(async (request) => {
   const headers = enforceRateLimit(`ip:${clientIp(request)}:map`, LIMITS.publicMapPerMinute);
-  const { bbox, layers } = parseSearchParams(request, mapQuerySchema);
+  const { bbox, layers, history_years } = parseSearchParams(request, mapQuerySchema);
   const supabase = await createClient();
-  const data = await getMapData(supabase, bbox, layers);
+  const data = await getMapData(supabase, bbox, layers, history_years);
   return json(data, { headers: { ...headers, 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' } });
 });

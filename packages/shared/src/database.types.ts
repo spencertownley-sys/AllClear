@@ -494,6 +494,7 @@ export type Database = {
           p_radius_miles: number;
           p_event_types: string[];
           p_limit?: number;
+          p_min_year?: number | null;
         };
         Returns: Array<{
           id: string;
@@ -518,6 +519,7 @@ export type Database = {
           p_max_lat: number;
           p_event_types: string[];
           p_limit?: number;
+          p_min_year?: number | null;
         };
         Returns: Array<{
           id: string;

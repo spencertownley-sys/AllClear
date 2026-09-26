@@ -70,15 +70,23 @@ describe('mapQuerySchema', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.bbox.minLng).toBe(-125);
-      expect(result.data.layers).toEqual({ fires: true, quakes: false, perimeters: false, storms: false });
+      expect(result.data.layers).toEqual({ fires: true, quakes: false, perimeters: false, storms: false, history: false });
+      expect(result.data.history_years).toBe(10);
     }
   });
   it('defaults to every layer', () => {
     const result = mapQuerySchema.safeParse({ bbox: '-125,24,-66,50' });
-    expect(result.success && result.data.layers).toEqual({ fires: true, quakes: true, perimeters: true, storms: true });
+    expect(result.success && result.data.layers).toEqual({ fires: true, quakes: true, perimeters: true, storms: true, history: false });
   });
   it('rejects a bad bbox', () => {
     expect(mapQuerySchema.safeParse({ bbox: 'nope' }).success).toBe(false);
+  });
+  it('accepts the history layer with a look-back up to 25 years', () => {
+    const ok = mapQuerySchema.safeParse({ bbox: '-125,24,-66,50', layers: 'history', history_years: '25' });
+    expect(ok.success && ok.data.layers.history).toBe(true);
+    expect(ok.success && ok.data.history_years).toBe(25);
+    expect(mapQuerySchema.safeParse({ bbox: '-125,24,-66,50', history_years: '26' }).success).toBe(false);
+    expect(mapQuerySchema.safeParse({ bbox: '-125,24,-66,50', history_years: '0' }).success).toBe(false);
   });
 });
 

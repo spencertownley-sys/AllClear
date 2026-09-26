@@ -139,8 +139,13 @@ export const DEFAULT_MIN_INTERVAL_MINUTES: Record<ConditionType, number | null> 
 
 /** Radius used to surface tropical cyclones on a location's page. */
 export const STORM_RADIUS_MILES = 500;
-/** How far back the fire-history layer looks. */
+/** How far back the fire-history layer looks by default (years). */
 export const FIRE_HISTORY_YEARS = 10;
+/** The furthest back a user can ask for; the worker caches this much history. */
+export const FIRE_HISTORY_MAX_YEARS = 25;
+export const FIRE_HISTORY_YEAR_OPTIONS = [10, 15, 20, 25] as const;
+/** Nationwide history is cached only for fires at least this big (acres); near Watch Locations every size is kept. */
+export const FIRE_HISTORY_NATIONAL_MIN_ACRES = 1000;
 
 export const CAMERA_NETWORK_URL = 'https://www.alertwildfire.org/';
 

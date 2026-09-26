@@ -58,7 +58,7 @@ Everything AllClear shows comes from a public feed that needs no paid plan. Only
 | Satellite fire hotspots | NASA FIRMS (key) | 15 min |
 | Named incidents | NIFC WFIGS incident locations (InciWeb RSS fallback) | 15 min |
 | Active fire perimeters | NIFC WFIGS interagency perimeters | 20 min |
-| 10-year fire history near each Watch Location | NIFC interagency perimeter history | daily |
+| Fire history, up to 25 years back: every fire near a Watch Location, fires over 1,000 acres nationwide | NIFC interagency perimeter history | daily |
 | Earthquakes | USGS GeoJSON feed | 5 min |
 | Air quality | AirNow (key) | 30 min |
 | UV index | EPA Envirofacts UV daily forecast (by ZIP) | 6 h |

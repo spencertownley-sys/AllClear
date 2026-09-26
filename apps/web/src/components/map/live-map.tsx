@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Activity, CloudRain, Flame, Hexagon, Search, Thermometer, Tornado } from 'lucide-react';
-import { relativeTime, type GeocodeResult, type MapResponse } from '@allclear/shared';
+import { Activity, CloudRain, Flame, Hexagon, History, Search, Thermometer, Tornado } from 'lucide-react';
+import { FIRE_HISTORY_YEARS, FIRE_HISTORY_YEAR_OPTIONS, relativeTime, type GeocodeResult, type MapResponse } from '@allclear/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,28 +23,37 @@ interface LiveMapProps {
 }
 
 type BBox = { minLng: number; minLat: number; maxLng: number; maxLat: number };
-type Layers = { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean };
+type Layers = { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean; history: boolean };
+type HistoryYears = (typeof FIRE_HISTORY_YEAR_OPTIONS)[number];
 
 const EMPTY: MapResponse = {
-  data: { fires: [], quakes: [], perimeters: [], storms: [] },
-  meta: { fires_updated_at: null, quakes_updated_at: null, perimeters_updated_at: null, storms_updated_at: null },
+  data: { fires: [], quakes: [], perimeters: [], storms: [], history: [] },
+  meta: {
+    fires_updated_at: null,
+    quakes_updated_at: null,
+    perimeters_updated_at: null,
+    storms_updated_at: null,
+    history_updated_at: null,
+    history_years: FIRE_HISTORY_YEARS,
+  },
 };
 
-function readPrefs(): { basemap?: BasemapId; overlays?: Partial<OverlayState> } | null {
+function readPrefs(): { basemap?: BasemapId; overlays?: Partial<OverlayState>; historyYears?: HistoryYears } | null {
   try {
     const raw = window.localStorage.getItem(PREFS_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { basemap?: string; overlays?: Partial<OverlayState> };
+    const parsed = JSON.parse(raw) as { basemap?: string; overlays?: Partial<OverlayState>; historyYears?: number };
     const basemap = BASEMAP_IDS.find((id) => id === parsed.basemap);
-    return { basemap, overlays: parsed.overlays };
+    const historyYears = FIRE_HISTORY_YEAR_OPTIONS.find((y) => y === parsed.historyYears);
+    return { basemap, overlays: parsed.overlays, historyYears };
   } catch {
     return null;
   }
 }
 
-function writePrefs(basemap: BasemapId, overlays: OverlayState) {
+function writePrefs(basemap: BasemapId, overlays: OverlayState, historyYears: HistoryYears) {
   try {
-    window.localStorage.setItem(PREFS_KEY, JSON.stringify({ basemap, overlays }));
+    window.localStorage.setItem(PREFS_KEY, JSON.stringify({ basemap, overlays, historyYears }));
   } catch {
     // Per-viewer convenience only; ignore storage failures.
   }
@@ -58,7 +67,8 @@ const chip = (active: boolean, activeCls: string) =>
 
 /** The national public map (UI/UX Notes §3 "Map"): fires, perimeters, quakes and storms from /api/hazards/map. */
 export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMapProps) {
-  const [layers, setLayers] = useState<Layers>({ fires: true, quakes: true, perimeters: true, storms: true });
+  const [layers, setLayers] = useState<Layers>({ fires: true, quakes: true, perimeters: true, storms: true, history: false });
+  const [historyYears, setHistoryYears] = useState<HistoryYears>(FIRE_HISTORY_YEARS);
   const [basemap, setBasemap] = useState<BasemapId>('street');
   const [overlays, setOverlays] = useState<OverlayState>(DEFAULT_OVERLAYS);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
@@ -81,14 +91,15 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
       const prefs = readPrefs();
       if (prefs?.basemap) setBasemap(prefs.basemap);
       if (prefs?.overlays) setOverlays((o) => ({ ...o, ...prefs.overlays }));
+      if (prefs?.historyYears) setHistoryYears(prefs.historyYears);
       setPrefsLoaded(true);
     }, 0);
     return () => clearTimeout(t);
   }, [teaser]);
 
   useEffect(() => {
-    if (prefsLoaded) writePrefs(basemap, overlays);
-  }, [basemap, overlays, prefsLoaded]);
+    if (prefsLoaded) writePrefs(basemap, overlays, historyYears);
+  }, [basemap, overlays, historyYears, prefsLoaded]);
 
   const load = useCallback(
     async (bbox: BBox) => {
@@ -101,7 +112,8 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
       setLoading(true);
       try {
         const bboxParam = `${bbox.minLng.toFixed(3)},${bbox.minLat.toFixed(3)},${bbox.maxLng.toFixed(3)},${bbox.maxLat.toFixed(3)}`;
-        const result = await apiFetch<MapResponse>(`/api/hazards/map?bbox=${bboxParam}&layers=${layerParam}`);
+        const historyParam = layers.history ? `&history_years=${historyYears}` : '';
+        const result = await apiFetch<MapResponse>(`/api/hazards/map?bbox=${bboxParam}&layers=${layerParam}${historyParam}`);
         setData(result);
         setError(null);
       } catch (err) {
@@ -110,7 +122,7 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
         setLoading(false);
       }
     },
-    [layers],
+    [layers, historyYears],
   );
 
   const handleMoveEnd = useCallback(
@@ -165,6 +177,7 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
   const quakes = layers.quakes ? (data?.data.quakes ?? []) : [];
   const perimeters = layers.perimeters ? (data?.data.perimeters ?? []) : [];
   const storms = layers.storms ? (data?.data.storms ?? []) : [];
+  const history = layers.history ? (data?.data.history ?? []) : [];
 
   if (teaser) {
     return (
@@ -226,8 +239,41 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
           >
             <Tornado className="h-4 w-4" aria-hidden /> Storms
           </button>
+          <button
+            type="button"
+            aria-pressed={layers.history}
+            onClick={() => setLayers((l) => ({ ...l, history: !l.history }))}
+            className={chip(layers.history, 'border-stone-400 bg-stone-100 text-stone-900')}
+          >
+            <History className="h-4 w-4" aria-hidden /> Past fires
+          </button>
         </div>
       </div>
+
+      {layers.history ? (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-slate-700">Show fires from the last</span>
+          <div className="inline-flex rounded-control border border-slate-300 p-0.5" role="radiogroup" aria-label="Fire history look-back">
+            {FIRE_HISTORY_YEAR_OPTIONS.map((years) => (
+              <button
+                key={years}
+                type="button"
+                role="radio"
+                aria-checked={historyYears === years}
+                onClick={() => setHistoryYears(years)}
+                className={
+                  historyYears === years
+                    ? 'min-h-9 rounded-[6px] bg-primary px-3 text-sm font-medium text-white'
+                    : 'min-h-9 rounded-[6px] px-3 text-sm font-medium text-slate-600 hover:bg-slate-100'
+                }
+              >
+                {years} yrs
+              </button>
+            ))}
+          </div>
+          <span className="text-xs text-slate-500">Nationwide view shows fires over 1,000 acres; zoom in for the rest.</span>
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="inline-flex rounded-control border border-slate-300 p-0.5" role="radiogroup" aria-label="Basemap">
@@ -296,6 +342,7 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
           fires={fires}
           quakes={quakes}
           perimeters={perimeters}
+          history={history}
           storms={storms}
           pins={pins}
           basemap={basemap}
@@ -327,6 +374,11 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
         <span className="inline-flex items-center gap-1">
           <span className="inline-block h-3 w-3 rounded-full border-2 border-sky-800 bg-sky-500/60" aria-hidden /> Tropical storm (NOAA NHC)
         </span>
+        {layers.history ? (
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-3 w-3 rounded-sm border border-dashed border-stone-500 bg-stone-400/30" aria-hidden /> Past fire, last {historyYears} years (NIFC history)
+          </span>
+        ) : null}
         {loading ? <span>Updating…</span> : null}
         {data?.meta.fires_updated_at ? <span>Fires updated {relativeTime(data.meta.fires_updated_at)}</span> : null}
         {data?.meta.perimeters_updated_at ? <span>Perimeters updated {relativeTime(data.meta.perimeters_updated_at)}</span> : null}
@@ -334,7 +386,7 @@ export function LiveMap({ teaser = false, loggedIn = false, className }: LiveMap
         {data?.meta.storms_updated_at ? <span>Storms updated {relativeTime(data.meta.storms_updated_at)}</span> : null}
         <span>
           {data
-            ? `${data.data.fires.length} fires · ${data.data.perimeters.length} perimeters · ${data.data.quakes.length} quakes · ${data.data.storms.length} storms in view`
+            ? `${data.data.fires.length} fires · ${data.data.perimeters.length} perimeters · ${data.data.quakes.length} quakes · ${data.data.storms.length} storms${layers.history ? ` · ${data.data.history.length} past fires` : ''} in view`
             : ''}
         </span>
       </div>

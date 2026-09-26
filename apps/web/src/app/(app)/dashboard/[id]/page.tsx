@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ArrowLeft, Star } from 'lucide-react';
-import { ApiError, type WatchLocation, type LayerConfigDTO } from '@allclear/shared';
+import { ApiError, historyYearsSchema, type WatchLocation, type LayerConfigDTO } from '@allclear/shared';
 import { createClient, type ServerSupabaseClient } from '@/lib/supabase/server';
 import { getOwnedLocation, toLocationDTO } from '@/lib/data/locations';
 import { getLayers } from '@/lib/data/layers';
@@ -21,7 +21,7 @@ import { AlertsSection } from '@/components/hazards/alerts-section';
 import { ActiveAlertBanner } from '@/components/hazards/active-alert-banner';
 import { StormsNotice } from '@/components/hazards/storms-notice';
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ id: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
@@ -46,9 +46,15 @@ async function Weather({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx:
 async function Storms({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: Ctx }) {
   return <StormsNotice storms={await loadStorms(supabase, ctx)} />;
 }
-async function Wildfire({ supabase, ctx, location }: { supabase: ServerSupabaseClient; ctx: Ctx; location: WatchLocation }) {
-  const wildfire = await loadWildfire(supabase, ctx);
-  return <WildfireSection wildfire={wildfire} center={{ latitude: ctx.lat, longitude: ctx.lng, label: location.label }} />;
+async function Wildfire({ supabase, ctx, location, historyYears }: { supabase: ServerSupabaseClient; ctx: Ctx; location: WatchLocation; historyYears: number }) {
+  const wildfire = await loadWildfire(supabase, ctx, historyYears);
+  return (
+    <WildfireSection
+      wildfire={wildfire}
+      center={{ latitude: ctx.lat, longitude: ctx.lng, label: location.label }}
+      basePath={`/dashboard/${location.id}`}
+    />
+  );
 }
 async function Earthquakes({ supabase, ctx }: { supabase: ServerSupabaseClient; ctx: Ctx }) {
   return <EarthquakeSection earthquakes={await loadEarthquakes(supabase, ctx)} />;
@@ -65,8 +71,12 @@ async function AlertBanner({ supabase, ctx }: { supabase: ServerSupabaseClient; 
 }
 
 /** Full breakdown of every enabled layer; sections stream and fail independently. */
-export default async function LocationDetailPage({ params }: Params) {
+export default async function LocationDetailPage({ params, searchParams }: Params) {
   const { id } = await params;
+  const query = (await searchParams) ?? {};
+  const rawYears = Array.isArray(query.history_years) ? query.history_years[0] : query.history_years;
+  const parsedYears = historyYearsSchema.safeParse(rawYears);
+  const historyYears = parsedYears.success ? parsedYears.data : historyYearsSchema.parse(undefined);
   const supabase = await createClient();
   let location: WatchLocation;
   let layers: LayerConfigDTO[];
@@ -115,7 +125,7 @@ export default async function LocationDetailPage({ params }: Params) {
         {ctx.cfg.wildfire.enabled ? (
           <SectionErrorBoundary label="wildfire data">
             <Suspense fallback={<SectionSkeleton />}>
-              <Wildfire supabase={supabase} ctx={ctx} location={location} />
+              <Wildfire supabase={supabase} ctx={ctx} location={location} historyYears={historyYears} />
             </Suspense>
           </SectionErrorBoundary>
         ) : null}

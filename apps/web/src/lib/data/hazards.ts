@@ -3,6 +3,7 @@ import {
   ApiError,
   CAMERA_NETWORK_URL,
   DEFAULT_MIN_MAGNITUDE,
+  FIRE_HISTORY_YEARS,
   DEFAULT_RADIUS_MILES,
   STORM_RADIUS_MILES,
   aqiCategory,
@@ -284,7 +285,9 @@ export async function loadStorms(supabase: ServerSupabaseClient, ctx: LayerConte
 export async function loadWildfire(
   supabase: ServerSupabaseClient,
   ctx: LayerContext,
+  historyYears: number = FIRE_HISTORY_YEARS,
 ): Promise<NonNullable<LocationHazardsResponse['wildfire']>> {
+  const minYear = new Date().getUTCFullYear() - historyYears;
   const [fires, perimeters, history] = await Promise.all([
     rpcRows<HazardRow>(
       supabase.rpc('hazards_near', {
@@ -297,11 +300,18 @@ export async function loadWildfire(
       'wildfire data',
     ),
     rpcRows<PolygonRow>(
-      supabase.rpc('perimeters_near', { p_lat: ctx.lat, p_lng: ctx.lng, p_radius_miles: ctx.wildfireRadius, p_event_types: ['fire_perimeter'], p_limit: 25 }),
+      supabase.rpc('perimeters_near', { p_lat: ctx.lat, p_lng: ctx.lng, p_radius_miles: ctx.wildfireRadius, p_event_types: ['fire_perimeter'], p_limit: 25, p_min_year: null }),
       'fire perimeters',
     ),
     rpcRows<PolygonRow>(
-      supabase.rpc('perimeters_near', { p_lat: ctx.lat, p_lng: ctx.lng, p_radius_miles: ctx.wildfireRadius, p_event_types: ['fire_perimeter_historical'], p_limit: 20 }),
+      supabase.rpc('perimeters_near', {
+        p_lat: ctx.lat,
+        p_lng: ctx.lng,
+        p_radius_miles: ctx.wildfireRadius,
+        p_event_types: ['fire_perimeter_historical'],
+        p_limit: 60,
+        p_min_year: minYear,
+      }),
       'fire history',
     ),
   ]);
@@ -310,6 +320,7 @@ export async function loadWildfire(
     incidents: fires.filter((r) => r.event_type === 'fire_incident').map(toIncidentDTO),
     perimeters: perimeters.map(toPerimeterDTO),
     history: history.map(toHistoricalFireDTO).sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || (b.acres ?? 0) - (a.acres ?? 0)),
+    history_years: historyYears,
     cameras_url: CAMERA_NETWORK_URL,
     radius_miles: ctx.wildfireRadius,
     stale: fires.length > 0 ? isStale('firms', newestFetchedAt(fires)) : false,
@@ -370,12 +381,13 @@ export async function getLocationHazards(
   supabase: ServerSupabaseClient,
   location: WatchLocation,
   layers: LayerConfigDTO[],
+  options: { historyYears?: number } = {},
 ): Promise<LocationHazardsResponse> {
   const ctx = layerContext(location, layers);
   const { cfg } = ctx;
   const [weather, wildfire, earthquakes, air_quality, official_alerts, storms] = await Promise.all([
     cfg.weather.enabled ? loadWeather(supabase, ctx) : Promise.resolve(undefined),
-    cfg.wildfire.enabled ? loadWildfire(supabase, ctx) : Promise.resolve(undefined),
+    cfg.wildfire.enabled ? loadWildfire(supabase, ctx, options.historyYears ?? FIRE_HISTORY_YEARS) : Promise.resolve(undefined),
     cfg.earthquake.enabled ? loadEarthquakes(supabase, ctx) : Promise.resolve(undefined),
     cfg.air_quality.enabled ? loadAirQuality(supabase, ctx) : Promise.resolve(undefined),
     loadAlerts(supabase, ctx),

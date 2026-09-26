@@ -1,4 +1,4 @@
-import { FIRE_HISTORY_YEARS, bboxAround, type Json } from '@allclear/shared';
+import { FIRE_HISTORY_MAX_YEARS, FIRE_HISTORY_NATIONAL_MIN_ACRES, bboxAround, type Json } from '@allclear/shared';
 import { fetchJson } from '../http';
 import { bboxCenter, geojsonToEwkt, vertexCount } from '../geojson';
 import { cellsFor, type Cell } from '../cells';
@@ -10,7 +10,10 @@ import type { Poller, PollerContext } from './types';
 /** NIFC "InterAgency Fire Perimeter History — All Years" (public ArcGIS feature service). */
 export const DEFAULT_HISTORY_URL =
   'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/InterAgencyFirePerimeterHistory_All_Years_View/FeatureServer/0/query';
-const PER_CELL = 150;
+/** Largest fires first; 25 years within reach of a cell can be thousands of small burns. */
+const PER_CELL = 300;
+const NATIONAL_PAGE = 500;
+const NATIONAL_MAX_PAGES = 40;
 const TTL_DAYS = 30;
 const MAX_VERTICES = 8_000;
 /** Cells are ~35 mi across; fetch a box wide enough to cover any watch radius up to 100 mi. */
@@ -77,6 +80,47 @@ async function fetchCell(base: string, cell: Cell, sinceYear: number, now: Date)
   return (data.features ?? []).map((f) => normalizeHistory(f, now)).filter((r): r is EventInsert => r !== null);
 }
 
+/** WHERE clause for the nationwide pass: only fires big enough to matter at map scale. */
+export function nationalWhere(sinceYear: number, minAcres = FIRE_HISTORY_NATIONAL_MIN_ACRES): string {
+  return `FIRE_YEAR_INT >= ${sinceYear} AND GIS_ACRES >= ${minAcres}`;
+}
+
+/**
+ * Nationwide history of large fires (>= FIRE_HISTORY_NATIONAL_MIN_ACRES) so the public map can show
+ * "what burned here" anywhere, not just near Watch Locations. Coarser geometry than the per-cell pass;
+ * per-cell rows overwrite these where both exist.
+ */
+async function fetchNational(base: string, sinceYear: number, now: Date): Promise<{ rows: EventInsert[]; pages: number }> {
+  const rows: EventInsert[] = [];
+  let offset = 0;
+  let pages = 0;
+  for (; pages < NATIONAL_MAX_PAGES; pages++) {
+    const url = new URL(base);
+    url.searchParams.set('where', nationalWhere(sinceYear));
+    url.searchParams.set('outFields', 'OBJECTID,INCIDENT,FIRE_YEAR_INT,GIS_ACRES,UNQE_FIRE_ID');
+    url.searchParams.set('orderByFields', 'GIS_ACRES DESC');
+    url.searchParams.set('resultRecordCount', String(NATIONAL_PAGE));
+    url.searchParams.set('resultOffset', String(offset));
+    url.searchParams.set('f', 'geojson');
+    url.searchParams.set('outSR', '4326');
+    url.searchParams.set('geometryPrecision', '3');
+    url.searchParams.set('maxAllowableOffset', '0.004');
+    const data = await fetchJson<{ features?: HistoryFeature[]; properties?: { exceededTransferLimit?: boolean }; error?: { message: string } }>(url.toString(), { timeoutMs: 120_000 });
+    if (data.error) throw new Error(`NIFC history error: ${data.error.message}`);
+    const batch = data.features ?? [];
+    for (const f of batch) {
+      const row = normalizeHistory(f, now);
+      if (row) rows.push(row);
+    }
+    if (!data.properties?.exceededTransferLimit || batch.length === 0) {
+      pages += 1;
+      break;
+    }
+    offset += NATIONAL_PAGE;
+  }
+  return { rows, pages };
+}
+
 export const nifcHistoryPoller: Poller = {
   name: 'nifc_history',
   layers: [],
@@ -85,19 +129,32 @@ export const nifcHistoryPoller: Poller = {
   async run({ sb, config, now }: PollerContext) {
     const locations = await getWatchLocations(sb);
     const cells = cellsFor(locations, 'history', 'wildfire').slice(0, config.MAX_CELLS_PER_RUN);
-    const sinceYear = now.getUTCFullYear() - FIRE_HISTORY_YEARS;
+    const sinceYear = now.getUTCFullYear() - FIRE_HISTORY_MAX_YEARS;
+    const base = config.NIFC_HISTORY_URL || DEFAULT_HISTORY_URL;
     const rows = new Map<string, EventInsert>();
+    let national = 0;
+    let nationalPages = 0;
+    let nationalFailed = false;
+    try {
+      const result = await fetchNational(base, sinceYear, now);
+      for (const row of result.rows) rows.set(row.external_id, row);
+      national = result.rows.length;
+      nationalPages = result.pages;
+    } catch (error) {
+      nationalFailed = true;
+      log.warn('nifc national history failed', errorFields(error));
+    }
     let failedCells = 0;
     for (const cell of cells) {
       try {
-        for (const row of await fetchCell(config.NIFC_HISTORY_URL || DEFAULT_HISTORY_URL, cell, sinceYear, now)) rows.set(row.external_id, row);
+        for (const row of await fetchCell(base, cell, sinceYear, now)) rows.set(row.external_id, row);
       } catch (error) {
         failedCells += 1;
         log.warn('nifc history cell failed', { cell: cell.key, ...errorFields(error) });
       }
     }
-    if (cells.length > 0 && failedCells === cells.length) throw new Error('Every NIFC history cell failed');
+    if (nationalFailed && (cells.length === 0 || failedCells === cells.length)) throw new Error('NIFC history: national pass and every cell failed');
     const written = await upsertEvents(sb, Array.from(rows.values()));
-    return { rows: written, details: { cells: cells.length, failedCells, sinceYear } };
+    return { rows: written, details: { cells: cells.length, failedCells, sinceYear, national, nationalPages, nationalFailed } };
   },
 };

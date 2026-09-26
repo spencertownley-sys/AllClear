@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { Camera, Flame, History } from 'lucide-react';
-import { FIRE_HISTORY_YEARS, formatMiles, type LocationHazardsResponse } from '@allclear/shared';
+import { FIRE_HISTORY_YEAR_OPTIONS, formatMiles, type LocationHazardsResponse } from '@allclear/shared';
+import { cn } from '@/lib/utils';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';
 import { HazardMap } from '@/components/map/hazard-map';
@@ -10,14 +12,16 @@ type Wildfire = NonNullable<LocationHazardsResponse['wildfire']>;
 interface Props {
   wildfire: Wildfire;
   center: { latitude: number; longitude: number; label: string };
+  /** Page path the history range links resolve against (`?history_years=` is appended). */
+  basePath: string;
 }
 
 function acresLine(acres: number | null): string {
   return acres !== null ? `${formatNumber(Math.round(acres))} acres` : 'size unknown';
 }
 
-export function WildfireSection({ wildfire, center }: Props) {
-  const { hotspots, incidents, perimeters, history, cameras_url, radius_miles } = wildfire;
+export function WildfireSection({ wildfire, center, basePath }: Props) {
+  const { hotspots, incidents, perimeters, history, history_years, cameras_url, radius_miles } = wildfire;
   const nothingActive = hotspots.length === 0 && incidents.length === 0 && perimeters.length === 0;
   const fires = [
     ...incidents.map((i) => ({
@@ -133,12 +137,30 @@ export function WildfireSection({ wildfire, center }: Props) {
         ) : null}
 
         <div className="rounded-card border border-slate-200 bg-slate-50 p-3">
-          <h4 className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <History className="h-3.5 w-3.5" aria-hidden /> Fire history · last {FIRE_HISTORY_YEARS} years
-          </h4>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <History className="h-3.5 w-3.5" aria-hidden /> Fire history · last {history_years} years
+            </h4>
+            <div className="inline-flex rounded-control border border-slate-300 bg-white p-0.5" role="group" aria-label="How far back to look">
+              {FIRE_HISTORY_YEAR_OPTIONS.map((years) => (
+                <Link
+                  key={years}
+                  href={`${basePath}?history_years=${years}#wildfire`}
+                  scroll={false}
+                  aria-current={history_years === years ? 'true' : undefined}
+                  className={cn(
+                    'min-h-8 rounded-[6px] px-2.5 text-xs font-medium leading-8',
+                    history_years === years ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100',
+                  )}
+                >
+                  {years} yrs
+                </Link>
+              ))}
+            </div>
+          </div>
           {history.length === 0 ? (
             <p className="mt-1 text-sm text-slate-600">
-              No recorded wildfire perimeters within {radius_miles} miles in the last {FIRE_HISTORY_YEARS} years.
+              No recorded wildfire perimeters within {radius_miles} miles in the last {history_years} years.
               <span className="block text-xs text-slate-500">History loads once a day from NIFC; a new location may take up to a day to fill in.</span>
             </p>
           ) : (
@@ -149,7 +171,7 @@ export function WildfireSection({ wildfire, center }: Props) {
                 {nothingActive ? <span className="block text-xs text-slate-500">Past perimeters appear as dashed outlines on the map when a fire is active.</span> : null}
               </p>
               <ul className="mt-2 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-2" aria-label="Past fires">
-                {history.slice(0, 10).map((h) => (
+                {history.slice(0, 20).map((h) => (
                   <li key={h.id} className="flex items-baseline justify-between gap-2">
                     <span className="truncate text-slate-800">
                       {h.name}

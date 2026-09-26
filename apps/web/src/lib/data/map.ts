@@ -1,5 +1,5 @@
 import 'server-only';
-import { ApiError, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type StormDTO } from '@allclear/shared';
+import { ApiError, FIRE_HISTORY_YEARS, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapHistoryDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type StormDTO } from '@allclear/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 type BboxRow = {
@@ -32,34 +32,44 @@ function a(row: { attributes: unknown }): Record<string, unknown> {
   return row.attributes && typeof row.attributes === 'object' ? (row.attributes as Record<string, unknown>) : {};
 }
 
+async function fetchPolygons(
+  supabase: ServerSupabaseClient,
+  bbox: BBox,
+  eventTypes: string[],
+  limit: number,
+  minYear: number | null,
+): Promise<PolyRow[]> {
+  const { data, error } = await supabase.rpc('hazard_polygons_in_bbox', {
+    p_min_lng: bbox.minLng,
+    p_min_lat: bbox.minLat,
+    p_max_lng: bbox.maxLng,
+    p_max_lat: bbox.maxLat,
+    p_event_types: eventTypes,
+    p_limit: limit,
+    p_min_year: minYear,
+  });
+  if (error) {
+    console.error('[map] hazard_polygons_in_bbox failed', error.message);
+    throw new ApiError('INTERNAL_ERROR', 'Could not load map data');
+  }
+  return (data ?? []) as PolyRow[];
+}
+
 export async function getMapData(
   supabase: ServerSupabaseClient,
   bbox: BBox,
-  layers: { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean },
+  layers: { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean; history: boolean },
+  historyYears: number = FIRE_HISTORY_YEARS,
 ): Promise<MapResponse> {
   const types: string[] = [];
   if (layers.fires) types.push('fire_hotspot', 'fire_incident');
   if (layers.quakes) types.push('earthquake');
   if (layers.storms) types.push('tropical_cyclone');
 
-  const polygonsPromise: Promise<PolyRow[]> = layers.perimeters
-    ? Promise.resolve(supabase
-        .rpc('hazard_polygons_in_bbox', {
-          p_min_lng: bbox.minLng,
-          p_min_lat: bbox.minLat,
-          p_max_lng: bbox.maxLng,
-          p_max_lat: bbox.maxLat,
-          p_event_types: ['fire_perimeter'],
-          p_limit: 400,
-        })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error('[map] hazard_polygons_in_bbox failed', error.message);
-            throw new ApiError('INTERNAL_ERROR', 'Could not load map data');
-          }
-          return (data ?? []) as PolyRow[];
-        }))
-    : Promise.resolve([]);
+  const polygonsPromise: Promise<PolyRow[]> = layers.perimeters ? fetchPolygons(supabase, bbox, ['fire_perimeter'], 400, null) : Promise.resolve([]);
+  // Largest fires first (the RPC orders by acres), so a national view shows the big ones and zooming in fills in the rest.
+  const minYear = new Date().getUTCFullYear() - historyYears;
+  const historyPromise: Promise<PolyRow[]> = layers.history ? fetchPolygons(supabase, bbox, ['fire_perimeter_historical'], 400, minYear) : Promise.resolve([]);
 
   const rows: BboxRow[] = types.length
     ? await (async () => {
@@ -79,7 +89,7 @@ export async function getMapData(
       })()
     : [];
 
-  const polygons = await polygonsPromise;
+  const [polygons, historyRows] = await Promise.all([polygonsPromise, historyPromise]);
   const fires: MapFireDTO[] = [];
   const quakes: MapQuakeDTO[] = [];
   const storms: StormDTO[] = [];
@@ -87,6 +97,20 @@ export async function getMapData(
   let quakesUpdated: string | null = null;
   let stormsUpdated: string | null = null;
   let perimetersUpdated: string | null = null;
+  let historyUpdated: string | null = null;
+
+  const history: MapHistoryDTO[] = historyRows.map((row) => {
+    const attrs = a(row);
+    if (!historyUpdated || row.fetched_at > historyUpdated) historyUpdated = row.fetched_at;
+    return {
+      id: row.id,
+      name: row.title,
+      year: typeof attrs.year === 'number' ? attrs.year : null,
+      acres: typeof attrs.acres === 'number' ? attrs.acres : null,
+      geojson: row.geojson as GeoJsonGeometry,
+      source: row.source,
+    };
+  });
 
   const perimeters: MapPerimeterDTO[] = polygons.map((row) => {
     const attrs = a(row);
@@ -154,7 +178,10 @@ export async function getMapData(
   }
 
   return {
-    data: { fires, quakes, perimeters, storms },
-    meta: { fires_updated_at: firesUpdated, quakes_updated_at: quakesUpdated, perimeters_updated_at: perimetersUpdated, storms_updated_at: stormsUpdated },
+    data: { fires, quakes, perimeters, storms, history },
+    meta: { fires_updated_at: firesUpdated, quakes_updated_at: quakesUpdated, perimeters_updated_at: perimetersUpdated, storms_updated_at: stormsUpdated,
+      history_updated_at: historyUpdated,
+      history_years: historyYears,
+    },
   };
 }

@@ -242,7 +242,7 @@ export interface PerimeterDTO {
   source: HazardSource;
 }
 
-/** A past fire perimeter within the location's radius (NIFC history, last 10 years). */
+/** A past fire perimeter within the location's radius (NIFC history, up to 25 years back). */
 export interface HistoricalFireDTO {
   id: string;
   name: string;
@@ -316,6 +316,8 @@ export interface LocationHazardsResponse {
     incidents: IncidentDTO[];
     perimeters: PerimeterDTO[];
     history: HistoricalFireDTO[];
+    /** How many years back `history` covers (user-selectable, capped by FIRE_HISTORY_MAX_YEARS). */
+    history_years: number;
     cameras_url: string;
     radius_miles: number;
     stale: boolean;
@@ -362,18 +364,32 @@ export interface MapPerimeterDTO {
   source: HazardSource;
 }
 
+/** A past fire perimeter on the public map (no distance; the viewport is the filter). */
+export interface MapHistoryDTO {
+  id: string;
+  name: string;
+  year: number | null;
+  acres: number | null;
+  geojson: GeoJsonGeometry;
+  source: HazardSource;
+}
+
 export interface MapResponse {
   data: {
     fires: MapFireDTO[];
     quakes: MapQuakeDTO[];
     perimeters: MapPerimeterDTO[];
     storms: StormDTO[];
+    history: MapHistoryDTO[];
   };
   meta: {
     fires_updated_at: string | null;
     quakes_updated_at: string | null;
     perimeters_updated_at: string | null;
     storms_updated_at: string | null;
+    history_updated_at: string | null;
+    /** Echo of the look-back applied to `history`. */
+    history_years: number;
   };
 }
 

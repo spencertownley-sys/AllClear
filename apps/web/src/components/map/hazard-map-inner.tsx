@@ -14,7 +14,7 @@ import {
   type GeoJSONProps,
 } from 'react-leaflet';
 import type { LatLngBoundsExpression } from 'leaflet';
-import type { GeoJsonGeometry, HistoricalFireDTO, MapFireDTO, MapQuakeDTO, StormDTO } from '@allclear/shared';
+import type { GeoJsonGeometry, MapFireDTO, MapQuakeDTO, StormDTO } from '@allclear/shared';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import {
   BASEMAPS,
@@ -45,13 +45,22 @@ export interface MapPolygon {
   geojson: GeoJsonGeometry;
 }
 
+/** A past fire perimeter; both the public map DTO and the location-detail DTO satisfy this. */
+export interface HistoryPolygon {
+  id: string;
+  name: string;
+  year: number | null;
+  acres: number | null;
+  geojson: GeoJsonGeometry;
+}
+
 export interface HazardMapProps {
   center: [number, number];
   zoom: number;
   fires?: MapFireDTO[];
   quakes?: MapQuakeDTO[];
   perimeters?: MapPolygon[];
-  history?: HistoricalFireDTO[];
+  history?: HistoryPolygon[];
   storms?: StormDTO[];
   pins?: MapPin[];
   basemap?: BasemapId;

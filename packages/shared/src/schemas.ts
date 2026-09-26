@@ -10,6 +10,8 @@ import {
   VALID_RULE_COMBOS,
   type ConditionType,
   type NotificationLayerType,
+  FIRE_HISTORY_MAX_YEARS,
+  FIRE_HISTORY_YEARS,
 } from './constants';
 import { parseBbox } from './geo';
 
@@ -165,7 +167,15 @@ export function validateRuleUpdate(
   return first ? { ok: false, message: first.message } : { ok: true };
 }
 
+/** How many years of fire history to show; capped at what the worker caches. */
+export const historyYearsSchema = z.coerce.number().int().min(1).max(FIRE_HISTORY_MAX_YEARS).default(FIRE_HISTORY_YEARS);
+
+export const locationHazardsQuerySchema = z.object({
+  history_years: historyYearsSchema,
+});
+
 export const mapQuerySchema = z.object({
+  history_years: historyYearsSchema,
   bbox: z
     .string()
     .transform((value, ctx) => {
@@ -189,6 +199,7 @@ export const mapQuerySchema = z.object({
         quakes: requested.includes('quakes'),
         perimeters: requested.includes('perimeters'),
         storms: requested.includes('storms'),
+        history: requested.includes('history'),
       };
     }),
 });
