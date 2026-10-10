@@ -6,11 +6,11 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/worker/package.json apps/worker/
-RUN pnpm install --frozen-lockfile --filter @allclear/worker... --prod=false
+RUN pnpm install --frozen-lockfile --filter @nimbuswatch/worker... --prod=false
 
 COPY packages/shared packages/shared
 COPY apps/worker apps/worker
 
 ENV NODE_ENV=production
 EXPOSE 8080
-CMD ["pnpm", "--filter", "@allclear/worker", "start"]
+CMD ["pnpm", "--filter", "@nimbuswatch/worker", "start"]

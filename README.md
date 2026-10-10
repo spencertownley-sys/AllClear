@@ -33,7 +33,7 @@ pnpm dev:worker     # ingestion worker + /health on http://localhost:8080
 Everything is listed in [`.env.example`](.env.example). The web app needs the `NEXT_PUBLIC_*` values plus `SUPABASE_SERVICE_ROLE_KEY` (account deletion, ownership checks) and `NWS_USER_AGENT` (used for geocoding requests). The worker needs the Supabase service role, the free [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/api/map_key/) and [AirNow](https://docs.airnowapi.org/account/request/) keys, `NWS_USER_AGENT`, a [Resend](https://resend.com) key for email, and a VAPID keypair for Web Push:
 
 ```bash
-pnpm --filter @allclear/worker vapid   # prints VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / NEXT_PUBLIC_VAPID_PUBLIC_KEY
+pnpm --filter @nimbuswatch/worker vapid   # prints VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ```
 
 A poller whose key is missing is skipped with a warning; the rest of the product keeps working (Tech Spec §5 fallbacks).
@@ -46,7 +46,7 @@ A poller whose key is missing is skipped with a warning; the rest of the product
 | `pnpm lint` | ESLint (web) |
 | `pnpm test` | Vitest unit tests (shared: geo/rules/schemas; web: rate limiter; worker: normalizers + notification selection) |
 | `pnpm build` | `next build` for the web app; type-checks the worker |
-| `pnpm --filter @allclear/worker poll usgs` | Run one poller once (`usgs`, `firms`, `nws_alerts`, `nws_weather`, `airnow`, `nifc`) |
+| `pnpm --filter @nimbuswatch/worker poll usgs` | Run one poller once (`usgs`, `firms`, `nws_alerts`, `nws_weather`, `airnow`, `nifc`) |
 
 ## Free data sources
 

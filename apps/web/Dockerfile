@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/web/package.json apps/web/
-RUN pnpm install --frozen-lockfile --filter @allclear/web... --prod=false
+RUN pnpm install --frozen-lockfile --filter @nimbuswatch/web... --prod=false
 
 COPY packages/shared packages/shared
 COPY apps/web apps/web
@@ -23,7 +23,7 @@ ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY \
     NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN \
     NEXT_TELEMETRY_DISABLED=1
-RUN pnpm --filter @allclear/web build
+RUN pnpm --filter @nimbuswatch/web build
 
 ENV NODE_ENV=production
 EXPOSE 3000

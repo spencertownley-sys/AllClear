@@ -40,7 +40,7 @@ Non-goals for MVP: scanner audio, AI risk summaries, native apps, non-US weather
 
 ```bash
 pnpm typecheck && pnpm lint && pnpm test
-pnpm --filter @allclear/web build
+pnpm --filter @nimbuswatch/web build
 ```
 
 For schema changes, add a new file under `supabase/migrations` (never edit an applied one), keep it additive, update `packages/shared/src/database.types.ts`, and re-run the SQL smoke test described in the PR that introduced the schema (harness: `auth.users` stub + `anon`/`authenticated`/`service_role` roles, then the migration, seed, and RPC calls as two different users).
