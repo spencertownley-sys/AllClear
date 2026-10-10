@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { HazardSource } from '@allclear/shared';
+import type { HazardSource } from '@nimbuswatch/shared';
 import { SourceLabel } from '@/components/ui/source-label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 

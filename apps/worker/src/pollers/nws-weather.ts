@@ -1,4 +1,4 @@
-import { celsiusToFahrenheit, kmhToMph, type WeatherCurrent, type WeatherDaily, type WeatherHourly } from '@allclear/shared';
+import { celsiusToFahrenheit, kmhToMph, type WeatherCurrent, type WeatherDaily, type WeatherHourly } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { cellsFor, type Cell } from '../cells';
 import { getWatchLocations, upsertWeather, type WeatherInsert } from '../db';

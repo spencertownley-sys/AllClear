@@ -10,7 +10,7 @@ import {
   RADIUS_LIMITS,
   type LayerConfigDTO,
   type LayerType,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Lock } from 'lucide-react';

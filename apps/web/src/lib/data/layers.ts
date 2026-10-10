@@ -8,7 +8,7 @@ import {
   type LayerType,
   type LayersPutInput,
   type LocationLayer,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 export function toLayerDTO(row: LocationLayer): LayerConfigDTO {

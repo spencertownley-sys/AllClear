@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight, Bell, MapPinned, ShieldCheck, Layers } from 'lucide-react';
-import { SOURCE_LABELS } from '@allclear/shared';
+import { SOURCE_LABELS } from '@nimbuswatch/shared';
 import { getOptionalUser } from '@/lib/supabase/server';
 import { AppShell } from '@/components/nav/app-shell';
 import { Button } from '@/components/ui/button';
@@ -73,7 +73,7 @@ export default async function LandingPage() {
       <section className="rounded-card border border-slate-200 bg-white p-6 md:p-8">
         <h2 className="text-xl font-semibold text-slate-900">Every fact is sourced</h2>
         <p className="mt-2 max-w-2xl text-sm text-slate-600">
-          AllClear relays data from named public agencies and shows you where each fact came from. We never editorialize or
+          NimbusWatch relays data from named public agencies and shows you where each fact came from. We never editorialize or
           predict — we just put it in one place.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2">

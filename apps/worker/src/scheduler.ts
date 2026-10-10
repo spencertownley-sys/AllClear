@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import type { TypedSupabaseClient } from '@allclear/shared';
+import type { TypedSupabaseClient } from '@nimbuswatch/shared';
 import type { WorkerConfig } from './config';
 import { deleteExpired, recordRunEnd, recordRunStart } from './db';
 import { log, errorFields } from './logger';

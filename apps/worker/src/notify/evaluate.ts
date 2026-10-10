@@ -9,7 +9,7 @@ import {
   type NotificationRule,
   type TypedSupabaseClient,
   type WatchLocation,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import type { WorkerConfig } from '../config';
 import { log, errorFields } from '../logger';
 import { sendEmail, emailEnabled } from './email';
@@ -132,13 +132,13 @@ export async function evaluateRules(sb: TypedSupabaseClient, config: WorkerConfi
         let pushed = 0;
         if (wantsPush && pushEnabled(config)) {
           const subs = await loadSubscriptions(sb, location.user_id);
-          pushed = await sendPush(sb, config, subs, { title: `AllClear · ${LAYER_LABELS[rule.layer_type]}`, body: summary, url, tag: `rule-${rule.id}` });
+          pushed = await sendPush(sb, config, subs, { title: `NimbusWatch · ${LAYER_LABELS[rule.layer_type]}`, body: summary, url, tag: `rule-${rule.id}` });
           if (pushed > 0) delivered.push('web_push');
         }
         // Email is the fallback when push was requested but couldn't be delivered (no subscription).
         if ((wantsEmail || (wantsPush && pushed === 0)) && emailEnabled(config)) {
           const email = await emailFor(sb, location.user_id);
-          if (email && (await sendEmail(config, email, `AllClear: ${summary}`, summary, url))) delivered.push('email');
+          if (email && (await sendEmail(config, email, `NimbusWatch: ${summary}`, summary, url))) delivered.push('email');
         }
         if (delivered.length === 0) {
           // Nothing configured for delivery yet — still record it so the in-app history shows it once.

@@ -1,4 +1,4 @@
-import { aqiCategory, type AqiTone } from '@allclear/shared';
+import { aqiCategory, type AqiTone } from '@nimbuswatch/shared';
 import { Badge } from '@/components/ui/badge';
 
 const TONE_MAP: Record<AqiTone, 'good' | 'warning' | 'danger' | 'purple' | 'maroon' | 'neutral'> = {

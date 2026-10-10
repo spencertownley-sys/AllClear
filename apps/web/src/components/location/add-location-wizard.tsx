@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import type { GeocodeResult, LayerConfigDTO, LocationDTO } from '@allclear/shared';
+import type { GeocodeResult, LayerConfigDTO, LocationDTO } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

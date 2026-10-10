@@ -1,4 +1,4 @@
-import { aqiCategory, type Json } from '@allclear/shared';
+import { aqiCategory, type Json } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { cellsFor, type Cell } from '../cells';
 import { getWatchLocations, upsertEvents, type EventInsert } from '../db';

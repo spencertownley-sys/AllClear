@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ALERT_CATEGORY_LABELS, alertCategory, type AlertCategory, type OfficialAlertDTO, type SafetyCheckinDTO } from '@allclear/shared';
+import { ALERT_CATEGORY_LABELS, alertCategory, type AlertCategory, type OfficialAlertDTO, type SafetyCheckinDTO } from '@nimbuswatch/shared';
 import { formatDateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { SafetyCheckInButton } from '@/components/safety/safety-checkin-button';

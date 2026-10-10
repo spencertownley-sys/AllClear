@@ -1,5 +1,5 @@
 import 'server-only';
-import { ApiError, type NotificationHistoryItemDTO } from '@allclear/shared';
+import { ApiError, type NotificationHistoryItemDTO } from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 export interface NotificationHistoryPage {

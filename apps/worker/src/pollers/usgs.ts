@@ -1,4 +1,4 @@
-import type { Json } from '@allclear/shared';
+import type { Json } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import type { EventInsert } from '../db';
 import { upsertEvents } from '../db';

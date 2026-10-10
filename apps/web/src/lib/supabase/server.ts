@@ -2,7 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import type { Database } from '@allclear/shared';
+import type { Database } from '@nimbuswatch/shared';
 import { hasSupabaseConfig, requireSupabaseConfig } from '@/lib/env';
 
 /** Cookie-backed Supabase client for Server Components, Server Actions and Route Handlers. */

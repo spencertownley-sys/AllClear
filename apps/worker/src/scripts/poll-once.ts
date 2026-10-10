@@ -5,7 +5,7 @@ import { log } from '../logger';
 import { pollers } from '../pollers';
 import { Scheduler } from '../scheduler';
 
-/** Run a single poller once, e.g. `pnpm --filter @allclear/worker poll usgs`. */
+/** Run a single poller once, e.g. `pnpm --filter @nimbuswatch/worker poll usgs`. */
 const name = process.argv[2];
 const poller = pollers.find((p) => p.name === name);
 if (!poller) {

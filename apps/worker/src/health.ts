@@ -27,7 +27,7 @@ export function startHealthServer(port: number, scheduler: Scheduler | null, not
       return;
     }
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('AllClear worker\n');
+    res.end('NimbusWatch worker\n');
   });
   server.listen(port, () => log.info('health server listening', { port }));
   return server;

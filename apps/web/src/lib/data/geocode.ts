@@ -1,5 +1,5 @@
 import 'server-only';
-import { ApiError, type GeocodeResult } from '@allclear/shared';
+import { ApiError, type GeocodeResult } from '@nimbuswatch/shared';
 import { serverEnv } from '@/lib/env';
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org';
@@ -40,7 +40,7 @@ async function nominatim(path: string, params: Record<string, string>): Promise<
   const url = new URL(`${NOMINATIM}${path}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url, {
-    headers: { 'User-Agent': `AllClear ${serverEnv.nwsUserAgent}`, Accept: 'application/json' },
+    headers: { 'User-Agent': `NimbusWatch ${serverEnv.nwsUserAgent}`, Accept: 'application/json' },
     signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) throw new ApiError('INTERNAL_ERROR', "Couldn't reach the location service. Please try again.");

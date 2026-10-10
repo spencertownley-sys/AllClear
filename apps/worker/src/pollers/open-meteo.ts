@@ -1,4 +1,4 @@
-import { FORECAST_DAYS, wmoDescription, type WeatherDaily, type WeatherHourly } from '@allclear/shared';
+import { FORECAST_DAYS, wmoDescription, type WeatherDaily, type WeatherHourly } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { cellsFor, type Cell } from '../cells';
 import { getWatchLocations, upsertWeather, type WeatherInsert } from '../db';

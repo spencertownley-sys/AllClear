@@ -1,4 +1,4 @@
-import { locationHazardsQuerySchema } from '@allclear/shared';
+import { locationHazardsQuerySchema } from '@nimbuswatch/shared';
 import { authed } from '@/lib/api/context';
 import { assertUuid, parseSearchParams } from '@/lib/api/parse';
 import { json, withErrorHandling } from '@/lib/api/respond';

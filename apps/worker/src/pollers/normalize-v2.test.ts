@@ -6,7 +6,7 @@ import { normalizeUv, parseEpaDate } from './epa-uv';
 import { degreesToCompass, parseWindMph } from './nws-weather';
 import { bboxCenter, vertexCount } from '../geojson';
 import { minIntervalMs, selectCandidates } from '../notify/select';
-import type { NearbyHazardEvent, NotificationRule } from '@allclear/shared';
+import type { NearbyHazardEvent, NotificationRule } from '@nimbuswatch/shared';
 
 const now = new Date('2026-09-12T02:00:00Z');
 const square = { type: 'Polygon', coordinates: [[[-122.0, 47.75], [-121.9, 47.75], [-121.9, 47.85], [-122.0, 47.85], [-122.0, 47.75]]] };

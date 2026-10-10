@@ -1,4 +1,4 @@
-import { paginationSchema } from '@allclear/shared';
+import { paginationSchema } from '@nimbuswatch/shared';
 import { authed } from '@/lib/api/context';
 import { parseSearchParams } from '@/lib/api/parse';
 import { json, withErrorHandling } from '@/lib/api/respond';

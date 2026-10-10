@@ -1,4 +1,4 @@
-import { ApiError, pushSubscriptionSchema } from '@allclear/shared';
+import { ApiError, pushSubscriptionSchema } from '@nimbuswatch/shared';
 import { z } from 'zod';
 import { authed } from '@/lib/api/context';
 import { parseJsonBody } from '@/lib/api/parse';

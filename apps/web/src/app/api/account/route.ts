@@ -1,4 +1,4 @@
-import { ApiError } from '@allclear/shared';
+import { ApiError } from '@nimbuswatch/shared';
 import { authed } from '@/lib/api/context';
 import { noContent, withErrorHandling } from '@/lib/api/respond';
 import { getAdminClient } from '@/lib/supabase/admin';

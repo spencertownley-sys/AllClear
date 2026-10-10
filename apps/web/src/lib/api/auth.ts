@@ -1,4 +1,4 @@
-import { ApiError } from '@allclear/shared';
+import { ApiError } from '@nimbuswatch/shared';
 import type { User } from '@supabase/supabase-js';
 import { createClient, type ServerSupabaseClient } from '@/lib/supabase/server';
 

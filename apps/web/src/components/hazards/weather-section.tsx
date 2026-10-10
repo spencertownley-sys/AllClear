@@ -1,5 +1,5 @@
 import { CloudSun, Sun } from 'lucide-react';
-import { uvCategory, type WeatherDTO } from '@allclear/shared';
+import { uvCategory, type WeatherDTO } from '@nimbuswatch/shared';
 import { formatTemp } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Badge } from '@/components/ui/badge';

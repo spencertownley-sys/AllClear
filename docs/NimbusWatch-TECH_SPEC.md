@@ -1,4 +1,4 @@
-# AllClear — Technical Specification
+# NimbusWatch — Technical Specification
 
 **Version:** 1.0
 **Date:** September 11, 2026

@@ -10,7 +10,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@allclear/shared'],
+  transpilePackages: ['@nimbuswatch/shared'],
   poweredByHeader: false,
   async headers() {
     return [

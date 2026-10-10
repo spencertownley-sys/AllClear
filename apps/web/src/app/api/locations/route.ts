@@ -1,4 +1,4 @@
-import { createLocationSchema } from '@allclear/shared';
+import { createLocationSchema } from '@nimbuswatch/shared';
 import { authed } from '@/lib/api/context';
 import { parseJsonBody } from '@/lib/api/parse';
 import { json, withErrorHandling } from '@/lib/api/respond';

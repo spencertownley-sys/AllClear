@@ -1,5 +1,5 @@
 import 'server-only';
-import { ApiError, FIRE_HISTORY_YEARS, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapHistoryDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type MapSmokePlumeDTO, type SmokeDensity, type StormDTO } from '@allclear/shared';
+import { ApiError, FIRE_HISTORY_YEARS, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapHistoryDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type MapSmokePlumeDTO, type SmokeDensity, type StormDTO } from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 type BboxRow = {

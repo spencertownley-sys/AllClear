@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Activity, CloudFog, CloudRain, Flame, Hexagon, History, Search, Thermometer, Tornado } from 'lucide-react';
-import { FIRE_HISTORY_YEARS, FIRE_HISTORY_YEAR_OPTIONS, relativeTime, type GeocodeResult, type MapResponse } from '@allclear/shared';
+import { FIRE_HISTORY_YEARS, FIRE_HISTORY_YEAR_OPTIONS, relativeTime, type GeocodeResult, type MapResponse } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

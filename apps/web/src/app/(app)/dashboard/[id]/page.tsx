@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ArrowLeft, Star } from 'lucide-react';
-import { ApiError, historyYearsSchema, type WatchLocation, type LayerConfigDTO } from '@allclear/shared';
+import { ApiError, historyYearsSchema, type WatchLocation, type LayerConfigDTO } from '@nimbuswatch/shared';
 import { createClient, type ServerSupabaseClient } from '@/lib/supabase/server';
 import { getOwnedLocation, toLocationDTO } from '@/lib/data/locations';
 import { getLayers } from '@/lib/data/layers';

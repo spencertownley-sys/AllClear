@@ -1,4 +1,4 @@
-import type { TypedSupabaseClient } from '@allclear/shared';
+import type { TypedSupabaseClient } from '@nimbuswatch/shared';
 import type { WorkerConfig } from '../config';
 
 export interface PollerContext {

@@ -1,4 +1,4 @@
-import { createAdminClient, type CachedWeather, type Database, type Json, type LocationLayer, type TypedSupabaseClient, type WatchLocation } from '@allclear/shared';
+import { createAdminClient, type CachedWeather, type Database, type Json, type LocationLayer, type TypedSupabaseClient, type WatchLocation } from '@nimbuswatch/shared';
 import type { WorkerConfig } from './config';
 import { log } from './logger';
 

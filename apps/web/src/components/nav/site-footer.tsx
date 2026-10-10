@@ -4,7 +4,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-10 border-t border-slate-200 py-6 text-xs text-slate-500">
       <p className="max-w-3xl">
-        AllClear relays publicly available data from government and scientific agencies. It is not an official emergency
+        NimbusWatch relays publicly available data from government and scientific agencies. It is not an official emergency
         notification system and should never be your only source of safety information. Follow instructions from local
         authorities.
       </p>

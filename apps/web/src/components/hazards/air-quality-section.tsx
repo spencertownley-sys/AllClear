@@ -1,5 +1,5 @@
 import { Wind } from 'lucide-react';
-import { aqiCategory, type AirQualityDTO } from '@allclear/shared';
+import { aqiCategory, type AirQualityDTO } from '@nimbuswatch/shared';
 import { formatDateTime } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AqiBadge } from './aqi-badge';

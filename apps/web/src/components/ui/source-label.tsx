@@ -1,4 +1,4 @@
-import { SOURCE_LABELS, relativeTime, type HazardSource } from '@allclear/shared';
+import { SOURCE_LABELS, relativeTime, type HazardSource } from '@nimbuswatch/shared';
 import { cn } from '@/lib/utils';
 
 interface SourceLabelProps {

@@ -1,8 +1,8 @@
-# AllClear
+# NimbusWatch
 
 One calm dashboard for the places you care about: weather, wildfire & smoke, earthquakes, air quality and official alerts — every fact sourced from a named public feed (NWS, NASA FIRMS, USGS, AirNow, NIFC/InciWeb, NOAA NHC, EPA).
 
-The product docs that drive this build live in [`docs/`](docs/): [PRD](docs/AllClear-PRD.md) · [Tech Spec](docs/AllClear-TECH_SPEC.md) · [API Design](docs/AllClear-API_DESIGN.md) · [UI/UX Notes](docs/AllClear-UI_UX_NOTES.md) · [Launch Checklist](docs/AllClear-LAUNCH_CHECKLIST.md). The build prompt is [`CLAUDE.md`](CLAUDE.md).
+The product docs that drive this build live in [`docs/`](docs/): [PRD](docs/NimbusWatch-PRD.md) · [Tech Spec](docs/NimbusWatch-TECH_SPEC.md) · [API Design](docs/NimbusWatch-API_DESIGN.md) · [UI/UX Notes](docs/NimbusWatch-UI_UX_NOTES.md) · [Launch Checklist](docs/NimbusWatch-LAUNCH_CHECKLIST.md). The build prompt is [`CLAUDE.md`](CLAUDE.md).
 
 ## Layout
 
@@ -50,7 +50,7 @@ A poller whose key is missing is skipped with a warning; the rest of the product
 
 ## Free data sources
 
-Everything AllClear shows comes from a public feed that needs no paid plan. Only NASA FIRMS and AirNow need a (free) API key; the rest are open.
+Everything NimbusWatch shows comes from a public feed that needs no paid plan. Only NASA FIRMS and AirNow need a (free) API key; the rest are open.
 
 | What | Feed | Cadence |
 | --- | --- | --- |
@@ -86,7 +86,7 @@ The browser never calls a government API. The worker polls each source on its ow
 - **First data before the worker runs.** The `seed-snapshot` Edge Function (deployed on the live project) fills `cached_hazard_events` with a real USGS / NIFC / NHC snapshot when invoked (`POST /functions/v1/seed-snapshot?source=usgs|nifc|nhc|perimeters` with the anon key). It stands down automatically once the worker has written in the last hour.
 - **Database → Supabase.** CI applies `supabase/migrations` with the Supabase CLI before deploying. Migrations are additive so a code rollback never needs a DB rollback (Tech Spec §9).
 
-See [`docs/AllClear-LAUNCH_CHECKLIST.md`](docs/AllClear-LAUNCH_CHECKLIST.md) before announcing anything.
+See [`docs/NimbusWatch-LAUNCH_CHECKLIST.md`](docs/NimbusWatch-LAUNCH_CHECKLIST.md) before announcing anything.
 
 ## Where the spec was interpreted
 

@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
-import { parseDms, type Json } from '@allclear/shared';
+import { parseDms, type Json } from '@nimbuswatch/shared';
 import { fetchJson, fetchText } from '../http';
 import { upsertEvents, type EventInsert } from '../db';
 import { log, errorFields } from '../logger';
@@ -168,7 +168,7 @@ export function normalizeInciwebItem(item: RssItem, now: Date): EventInsert | nu
 }
 
 export async function fetchInciwebRss(now: Date, url = INCIWEB_RSS): Promise<EventInsert[]> {
-  const xml = await fetchText(url, { timeoutMs: 30_000, headers: { 'User-Agent': 'AllClear worker' } });
+  const xml = await fetchText(url, { timeoutMs: 30_000, headers: { 'User-Agent': 'NimbusWatch worker' } });
   const parser = new XMLParser({ ignoreAttributes: true });
   const doc = parser.parse(xml) as { rss?: { channel?: { item?: RssItem | RssItem[] } } };
   const items = doc.rss?.channel?.item;

@@ -1,5 +1,5 @@
 import 'server-only';
-import { createAdminClient, type TypedSupabaseClient } from '@allclear/shared';
+import { createAdminClient, type TypedSupabaseClient } from '@nimbuswatch/shared';
 import { requireSupabaseConfig, serverEnv } from '@/lib/env';
 
 let adminClient: TypedSupabaseClient | null = null;

@@ -6,7 +6,7 @@ import {
   type TablesUpdate,
   type UpdateLocationInput,
   type WatchLocation,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 import { getAdminClient } from '@/lib/supabase/admin';
 

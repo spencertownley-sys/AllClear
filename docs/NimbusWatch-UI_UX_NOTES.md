@@ -1,4 +1,4 @@
-# AllClear — UI/UX Design Notes
+# NimbusWatch — UI/UX Design Notes
 
 ---
 
@@ -166,7 +166,7 @@
 ## 4. Navigation Structure
 
 ```
-AllClear
+NimbusWatch
 ├── Marketing (logged out)
 ├── Sign Up / Log In
 ├── Onboarding (first-time only)
@@ -211,7 +211,7 @@ AllClear
 
 ```
 ┌─────────────────────────────────┐
-│  AllClear            [+ Add]    │
+│  NimbusWatch            [+ Add]    │
 ├─────────────────────────────────┤
 │  ┌───────────────────────────┐  │
 │  │ Home · Seattle, WA        │  │

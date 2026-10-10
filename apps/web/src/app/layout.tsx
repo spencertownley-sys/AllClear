@@ -3,13 +3,13 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: { default: 'AllClear', template: '%s · AllClear' },
+  title: { default: 'NimbusWatch', template: '%s · NimbusWatch' },
   description:
     'One calm dashboard for weather, wildfire, earthquake, air-quality and official-alert status at the places you care about — every fact sourced from NWS, NASA FIRMS, USGS and AirNow.',
-  applicationName: 'AllClear',
+  applicationName: 'NimbusWatch',
   manifest: '/manifest.webmanifest',
   icons: { icon: '/icon.svg' },
-  appleWebApp: { capable: true, title: 'AllClear', statusBarStyle: 'default' },
+  appleWebApp: { capable: true, title: 'NimbusWatch', statusBarStyle: 'default' },
 };
 
 export const viewport: Viewport = {

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPinned } from 'lucide-react';
-import type { NotificationRuleDTO } from '@allclear/shared';
+import type { NotificationRuleDTO } from '@nimbuswatch/shared';
 import { createClient } from '@/lib/supabase/server';
 import { listLocations, toLocationDTO } from '@/lib/data/locations';
 import { toRuleDTO } from '@/lib/data/rules';

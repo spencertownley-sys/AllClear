@@ -1,4 +1,4 @@
-import { geocodeSearchSchema, reverseGeocodeSchema } from '@allclear/shared';
+import { geocodeSearchSchema, reverseGeocodeSchema } from '@nimbuswatch/shared';
 import { parseSearchParams } from '@/lib/api/parse';
 import { LIMITS, clientIp, enforceRateLimit } from '@/lib/api/rate-limit';
 import { json, withErrorHandling } from '@/lib/api/respond';

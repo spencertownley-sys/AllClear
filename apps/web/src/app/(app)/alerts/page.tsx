@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BellOff, Mail, Smartphone } from 'lucide-react';
-import { LAYER_LABELS, describeRuleCondition, paginationSchema, type NotificationHistoryItemDTO } from '@allclear/shared';
+import { LAYER_LABELS, describeRuleCondition, paginationSchema, type NotificationHistoryItemDTO } from '@nimbuswatch/shared';
 import { createClient } from '@/lib/supabase/server';
 import { listNotifications } from '@/lib/data/notifications';
 import { formatDateTime } from '@/lib/format';

@@ -1,4 +1,4 @@
-import { FIRE_HISTORY_MAX_YEARS, FIRE_HISTORY_NATIONAL_MIN_ACRES, bboxAround, type Json } from '@allclear/shared';
+import { FIRE_HISTORY_MAX_YEARS, FIRE_HISTORY_NATIONAL_MIN_ACRES, bboxAround, type Json } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { bboxCenter, geojsonToEwkt, vertexCount } from '../geojson';
 import { cellsFor, type Cell } from '../cells';

@@ -15,7 +15,7 @@ import {
 } from 'react-leaflet';
 import * as L from 'leaflet';
 import type { LatLngBoundsExpression } from 'leaflet';
-import type { GeoJsonGeometry, MapFireDTO, MapQuakeDTO, SmokeDensity, StormDTO } from '@allclear/shared';
+import type { GeoJsonGeometry, MapFireDTO, MapQuakeDTO, SmokeDensity, StormDTO } from '@nimbuswatch/shared';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import { BASEMAPS, DEFAULT_OVERLAYS, OVERLAYS, SST_WMS_LAYER, SST_WMS_URL, type BasemapId, type OverlayState } from './basemaps';
 import { LEGACY_RADAR_TILE_URL, radarFrameTileUrl } from './radar';

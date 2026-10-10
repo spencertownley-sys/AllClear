@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { MapPin, Search } from 'lucide-react';
-import type { GeocodeResult } from '@allclear/shared';
+import type { GeocodeResult } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';

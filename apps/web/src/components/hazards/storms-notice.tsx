@@ -1,5 +1,5 @@
 import { Tornado } from 'lucide-react';
-import { formatMiles, type StormDTO } from '@allclear/shared';
+import { formatMiles, type StormDTO } from '@nimbuswatch/shared';
 import { formatDateTime } from '@/lib/format';
 import { HazardSection } from './section';
 

@@ -1,4 +1,4 @@
-/* AllClear service worker: Web Push display + click-through. No offline caching in MVP. */
+/* NimbusWatch service worker: Web Push display + click-through. No offline caching in MVP. */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
   } catch {
     payload = { body: event.data ? event.data.text() : '' };
   }
-  const title = payload.title || 'AllClear';
+  const title = payload.title || 'NimbusWatch';
   const options = {
     body: payload.body || '',
     icon: '/icons/icon.svg',

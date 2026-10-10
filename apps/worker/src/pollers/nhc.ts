@@ -1,4 +1,4 @@
-import type { Json } from '@allclear/shared';
+import type { Json } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { upsertEvents, type EventInsert } from '../db';
 import type { Poller, PollerContext } from './types';

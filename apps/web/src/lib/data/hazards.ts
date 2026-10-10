@@ -28,7 +28,7 @@ import {
   type WeatherDaily,
   type WeatherDTO,
   type WeatherHourly,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 import { layerMap } from './layers';
 import { mergeDaily, mergeHourly, weeklySummaries } from './weather-merge';

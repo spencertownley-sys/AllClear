@@ -1,7 +1,7 @@
 'use client';
 
 import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@allclear/shared';
+import type { Database } from '@nimbuswatch/shared';
 import { requireSupabaseConfig } from '@/lib/env';
 
 let browserClient: ReturnType<typeof createBrowserClient<Database>> | null = null;

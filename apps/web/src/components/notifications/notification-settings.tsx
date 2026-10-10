@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import type { LocationDTO, NotificationRuleDTO } from '@allclear/shared';
+import type { LocationDTO, NotificationRuleDTO } from '@nimbuswatch/shared';
 import { placeLine } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { RuleEditor } from './rule-editor';

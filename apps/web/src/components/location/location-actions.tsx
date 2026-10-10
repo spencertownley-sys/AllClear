@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Bell, Layers, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { LayerConfigDTO, LocationDTO } from '@allclear/shared';
+import type { LayerConfigDTO, LocationDTO } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, Dialog, DialogClose, DialogContent } from '@/components/ui/dialog';

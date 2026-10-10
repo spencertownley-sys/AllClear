@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ApiError, zodIssuesToDetails } from '@allclear/shared';
+import { ApiError, zodIssuesToDetails } from '@nimbuswatch/shared';
 import { ZodError } from 'zod';
 
 type Handler<TContext> = (request: Request, context: TContext) => Promise<Response>;

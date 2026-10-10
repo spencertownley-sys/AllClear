@@ -73,7 +73,7 @@ export function PushEnable({ hasRules }: PushEnableProps) {
   if (state === 'unsupported' || state === 'insecure') {
     body = (
       <p className="text-sm text-slate-600">
-        This browser doesn&apos;t support push notifications. Email alerts still work, and you can add AllClear to your home screen on iOS 16.4+ to enable push.
+        This browser doesn&apos;t support push notifications. Email alerts still work, and you can add NimbusWatch to your home screen on iOS 16.4+ to enable push.
       </p>
     );
   } else if (state === 'denied') {
@@ -94,7 +94,7 @@ export function PushEnable({ hasRules }: PushEnableProps) {
   } else {
     body = (
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-700">Get alerts on this device even when AllClear isn&apos;t open.</p>
+        <p className="text-sm text-slate-700">Get alerts on this device even when NimbusWatch isn&apos;t open.</p>
         <Button size="sm" onClick={() => void enable()} disabled={busy || !publicEnv.vapidPublicKey}>
           <BellRing className="h-4 w-4" aria-hidden /> {busy ? 'Enabling…' : 'Enable push notifications'}
         </Button>

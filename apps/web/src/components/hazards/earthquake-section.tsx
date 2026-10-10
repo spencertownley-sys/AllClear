@@ -1,5 +1,5 @@
 import { Activity } from 'lucide-react';
-import { formatMiles, type LocationHazardsResponse, type SafetyCheckinDTO } from '@allclear/shared';
+import { formatMiles, type LocationHazardsResponse, type SafetyCheckinDTO } from '@nimbuswatch/shared';
 import { formatDateTime } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SafetyCheckInButton } from '@/components/safety/safety-checkin-button';

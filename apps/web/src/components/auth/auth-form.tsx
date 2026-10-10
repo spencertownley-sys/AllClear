@@ -147,7 +147,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </>
         ) : (
           <>
-            New to AllClear?{' '}
+            New to NimbusWatch?{' '}
             <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-medium text-primary underline-offset-2 hover:underline">
               Create an account
             </Link>

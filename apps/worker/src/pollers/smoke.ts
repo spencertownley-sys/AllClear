@@ -1,4 +1,4 @@
-import type { Json, SmokeDensity } from '@allclear/shared';
+import type { Json, SmokeDensity } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { bboxCenter, geojsonToEwkt, vertexCount } from '../geojson';
 import { upsertEvents, type EventInsert } from '../db';

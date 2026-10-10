@@ -1,4 +1,4 @@
-import { ApiError, zodIssuesToDetails } from '@allclear/shared';
+import { ApiError, zodIssuesToDetails } from '@nimbuswatch/shared';
 import type { z } from 'zod';
 
 export async function parseJsonBody<TSchema extends z.ZodType>(

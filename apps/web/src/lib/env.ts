@@ -25,6 +25,6 @@ export const serverEnv = {
     return process.env.SUPABASE_SERVICE_ROLE_KEY || undefined;
   },
   get nwsUserAgent(): string {
-    return process.env.NWS_USER_AGENT || '(AllClear, unknown-contact)';
+    return process.env.NWS_USER_AGENT || '(NimbusWatch, unknown-contact)';
   },
 };

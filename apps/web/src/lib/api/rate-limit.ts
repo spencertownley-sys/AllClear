@@ -1,4 +1,4 @@
-import { ApiError } from '@allclear/shared';
+import { ApiError } from '@nimbuswatch/shared';
 
 interface Bucket {
   count: number;

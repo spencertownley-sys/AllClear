@@ -15,7 +15,7 @@ import {
   type ConditionType,
   type NotificationLayerType,
   type NotificationRuleDTO,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';

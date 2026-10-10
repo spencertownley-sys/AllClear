@@ -1,4 +1,4 @@
-# AllClear — API Design
+# NimbusWatch — API Design
 
 ---
 
@@ -281,4 +281,4 @@ All errors follow a consistent shape:
 
 ## 10. Webhooks
 
-Not applicable for MVP. AllClear is entirely pull-based: the worker polls external hazard APIs on a schedule (see Tech Spec §5) rather than receiving webhooks from them, since none of NWS, FIRMS, USGS, AirNow, or InciWeb offer a webhook/push subscription model to third parties. Revisit this section only if a future integration (e.g., a licensed public-safety incident feed) offers webhook delivery.
+Not applicable for MVP. NimbusWatch is entirely pull-based: the worker polls external hazard APIs on a schedule (see Tech Spec §5) rather than receiving webhooks from them, since none of NWS, FIRMS, USGS, AirNow, or InciWeb offer a webhook/push subscription model to third parties. Revisit this section only if a future integration (e.g., a licensed public-safety incident feed) offers webhook delivery.

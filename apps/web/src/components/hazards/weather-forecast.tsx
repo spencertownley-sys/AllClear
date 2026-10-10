@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { CalendarDays, Clock3, TrendingUp } from 'lucide-react';
-import { SOURCE_LABELS, type WeatherDTO, type WeatherDaily, type WeatherHourly } from '@allclear/shared';
+import { SOURCE_LABELS, type WeatherDTO, type WeatherDaily, type WeatherHourly } from '@nimbuswatch/shared';
 import { formatHour, formatTemp } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/empty-state';

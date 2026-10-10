@@ -1,6 +1,6 @@
-# CLAUDE.md — AllClear
+# CLAUDE.md — NimbusWatch
 
-This is the build prompt / working agreement for AllClear. Read the five documents in `docs/` before changing anything substantive: the PRD (what and why), Tech Spec (architecture, data model, integrations), API Design (every endpoint and the error format), UI/UX Notes (every screen, every state) and Launch Checklist (what "done" means).
+This is the build prompt / working agreement for NimbusWatch. Read the five documents in `docs/` before changing anything substantive: the PRD (what and why), Tech Spec (architecture, data model, integrations), API Design (every endpoint and the error format), UI/UX Notes (every screen, every state) and Launch Checklist (what "done" means).
 
 ## What this app does
 

@@ -1,4 +1,4 @@
-import { layersPutSchema } from '@allclear/shared';
+import { layersPutSchema } from '@nimbuswatch/shared';
 import { authed } from '@/lib/api/context';
 import { assertUuid, parseJsonBody } from '@/lib/api/parse';
 import { json, withErrorHandling } from '@/lib/api/respond';

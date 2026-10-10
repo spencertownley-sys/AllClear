@@ -1,4 +1,4 @@
-import { uvCategory, type Json } from '@allclear/shared';
+import { uvCategory, type Json } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { getWatchLocations, upsertEvents, type EventInsert, type WatchLocationWithLayers } from '../db';
 import { log, errorFields } from '../logger';

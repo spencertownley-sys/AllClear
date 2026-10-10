@@ -14,7 +14,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@allclear/shared':
+      '@nimbuswatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@radix-ui/react-dialog':
@@ -111,7 +111,7 @@ importers:
 
   apps/worker:
     dependencies:
-      '@allclear/shared':
+      '@nimbuswatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@sentry/node':

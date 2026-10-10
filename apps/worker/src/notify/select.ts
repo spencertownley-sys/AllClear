@@ -1,4 +1,4 @@
-import { DEFAULT_MIN_INTERVAL_MINUTES, eventMatchesRule, type NearbyHazardEvent, type NotificationRule } from '@allclear/shared';
+import { DEFAULT_MIN_INTERVAL_MINUTES, eventMatchesRule, type NearbyHazardEvent, type NotificationRule } from '@nimbuswatch/shared';
 
 export interface PriorNotification {
   hazard_event_id: string | null;

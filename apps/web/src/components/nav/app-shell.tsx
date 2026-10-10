@@ -32,7 +32,7 @@ export function Logo({ className }: { className?: string }) {
       <span className="inline-flex h-8 w-8 items-center justify-center rounded-control bg-primary text-primary-foreground">
         <ShieldCheck className="h-5 w-5" aria-hidden />
       </span>
-      <span>AllClear</span>
+      <span>NimbusWatch</span>
     </Link>
   );
 }

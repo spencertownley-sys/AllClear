@@ -1,4 +1,4 @@
-import type { Json } from '@allclear/shared';
+import type { Json } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { bboxCenter, geojsonToEwkt, vertexCount } from '../geojson';
 import { upsertEvents, type EventInsert } from '../db';

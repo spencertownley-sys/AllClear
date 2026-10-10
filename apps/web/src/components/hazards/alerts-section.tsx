@@ -1,5 +1,5 @@
 import { ShieldCheck, Siren } from 'lucide-react';
-import type { OfficialAlertDTO, SafetyCheckinDTO } from '@allclear/shared';
+import type { OfficialAlertDTO, SafetyCheckinDTO } from '@nimbuswatch/shared';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AlertList } from './alert-list';
 import { HazardSection } from './section';

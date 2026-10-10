@@ -1,5 +1,5 @@
 import 'server-only';
-import { ApiError, type CreateCheckinInput, type SafetyCheckinDTO } from '@allclear/shared';
+import { ApiError, type CreateCheckinInput, type SafetyCheckinDTO } from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 /**

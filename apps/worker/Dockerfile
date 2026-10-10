@@ -1,4 +1,4 @@
-# Railway image for the AllClear ingestion worker (built from the repo root).
+# Railway image for the NimbusWatch ingestion worker (built from the repo root).
 FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 WORKDIR /app

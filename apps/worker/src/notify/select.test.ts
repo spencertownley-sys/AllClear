@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { NearbyHazardEvent, NotificationRule } from '@allclear/shared';
+import type { NearbyHazardEvent, NotificationRule } from '@nimbuswatch/shared';
 import { selectCandidates } from './select';
 
 const now = new Date('2026-09-12T02:00:00Z');

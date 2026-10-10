@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
-import { relativeTime, type EventType, type SafetyCheckinDTO } from '@allclear/shared';
+import { relativeTime, type EventType, type SafetyCheckinDTO } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

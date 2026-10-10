@@ -1,4 +1,4 @@
-# AllClear — Product Requirements Document
+# NimbusWatch — Product Requirements Document
 
 **Version:** 1.0
 **Date:** September 11, 2026
@@ -13,7 +13,7 @@
 People who want situational awareness about the places they care about — weather, wildfire, earthquakes, air quality, official emergency alerts — currently juggle four or five separate apps to get it: a weather app, a fire-tracking app, an air-quality app, USGS's own site for quakes, and whatever their county uses for alerts. Each has its own saved-locations list and its own notification settings, so the user re-enters the same city over and over. And every one of these apps is built for a single audience — a light user who just wants tomorrow's forecast gets the same interface as a scanner-obsessed prepper, because there's no way to say "I only care about weather and fire, hide the rest."
 
 ### 1.2 Proposed Solution
-AllClear is a single dashboard where a user builds a personal "Watch List" of locations (home, a parent's city, an upcoming trip), and for each location picks which hazard layers matter to them — weather, wildfire, earthquakes, air quality, and official alerts. Every layer is sourced from a named, labeled public data feed (NWS, NASA FIRMS, USGS, AirNow), so the user always knows where a fact came from. The product is deliberately narrow for v1: no scanner audio, no AI-generated summaries, no social features — just a fast, trustworthy, radically simplified version of what five apps already do separately.
+NimbusWatch is a single dashboard where a user builds a personal "Watch List" of locations (home, a parent's city, an upcoming trip), and for each location picks which hazard layers matter to them — weather, wildfire, earthquakes, air quality, and official alerts. Every layer is sourced from a named, labeled public data feed (NWS, NASA FIRMS, USGS, AirNow), so the user always knows where a fact came from. The product is deliberately narrow for v1: no scanner audio, no AI-generated summaries, no social features — just a fast, trustworthy, radically simplified version of what five apps already do separately.
 
 ### 1.3 Goals
 - **Primary goal:** A user can see a trustworthy, at-a-glance status for every place they care about, across every hazard type they choose to track, from one screen — replacing the need to check multiple apps.
@@ -161,7 +161,7 @@ AllClear is a single dashboard where a user builds a personal "Watch List" of lo
 |---|---|---|---|
 | 1 | InciWeb has no confirmed clean public JSON API | Medium | Poller falls back to NIFC's public open-data/ArcGIS feeds or InciWeb's RSS feed; verify exact endpoint during implementation (see Tech Spec §5) |
 | 2 | IPAWS itself isn't a general-purpose consumer API (it's built for certified alerting authorities to originate alerts, not for third parties to subscribe to) | Medium | MVP treats NWS's own active-alerts endpoint as the practical stand-in for "official alerts"; revisit if broader all-hazards coverage is needed |
-| 3 | Free government APIs can rate-limit, go down, or change schema without notice, and AllClear has no support contract with any of them | High | Cache-first architecture (see Tech Spec) so a single source outage degrades one layer, not the whole product; graceful per-source failure handling |
+| 3 | Free government APIs can rate-limit, go down, or change schema without notice, and NimbusWatch has no support contract with any of them | High | Cache-first architecture (see Tech Spec) so a single source outage degrades one layer, not the whole product; graceful per-source failure handling |
 | 4 | Wrong or late emergency information carries real liability | High | Facts-only presentation, explicit source labeling on every card, no editorializing or prediction — modeled directly on how Watch Duty positions itself |
 | 5 | "Weather in other places" is a core ask (per original request) but MVP is US-only | Medium | Explicitly scoped as a Non-Goal for MVP; flagged as the first Phase 2 priority |
 

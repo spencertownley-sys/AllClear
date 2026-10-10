@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Activity, AlertTriangle, ChevronRight, Flame, ShieldCheck, Star } from 'lucide-react';
-import type { DashboardSummaryRow, WatchLocation } from '@allclear/shared';
+import type { DashboardSummaryRow, WatchLocation } from '@nimbuswatch/shared';
 import { formatTemp, placeLine } from '@/lib/format';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

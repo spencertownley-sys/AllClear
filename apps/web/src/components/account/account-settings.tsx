@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { LocationDTO } from '@allclear/shared';
+import type { LocationDTO } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { createClient } from '@/lib/supabase/client';
 import { placeLine } from '@/lib/format';

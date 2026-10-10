@@ -1,6 +1,6 @@
 'use client';
 
-import { isApiErrorBody, type ApiErrorCode } from '@allclear/shared';
+import { isApiErrorBody, type ApiErrorCode } from '@nimbuswatch/shared';
 
 export class ClientApiError extends Error {
   readonly code: ApiErrorCode;

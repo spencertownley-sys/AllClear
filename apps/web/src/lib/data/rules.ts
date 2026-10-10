@@ -7,7 +7,7 @@ import {
   type NotificationRuleDTO,
   type TablesUpdate,
   type UpdateRuleInput,
-} from '@allclear/shared';
+} from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 
 export function toRuleDTO(row: NotificationRule): NotificationRuleDTO {

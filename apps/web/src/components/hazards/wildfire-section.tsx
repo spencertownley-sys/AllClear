@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Camera, CloudFog, Flame, History } from 'lucide-react';
-import { FIRE_HISTORY_YEAR_OPTIONS, formatMiles, type LocationHazardsResponse, type SafetyCheckinDTO } from '@allclear/shared';
+import { FIRE_HISTORY_YEAR_OPTIONS, formatMiles, type LocationHazardsResponse, type SafetyCheckinDTO } from '@nimbuswatch/shared';
 import { cn } from '@/lib/utils';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import { EmptyState } from '@/components/ui/empty-state';

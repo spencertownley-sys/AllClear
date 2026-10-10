@@ -1,4 +1,4 @@
-# AllClear — Launch Checklist
+# NimbusWatch — Launch Checklist
 
 ---
 
@@ -58,7 +58,7 @@
 ### Legal & Compliance
 - [ ] Privacy Policy published and linked in footer — explicitly state what location data is stored and that it's never sold, mirroring the trust positioning used in the original concept doc
 - [ ] Terms of Service published and linked
-- [ ] Given the safety-adjacent nature of the product, confirm whether a plain-language disclaimer is needed stating AllClear relays public data and is not an official emergency notification system (this is the open legal question flagged in the PRD)
+- [ ] Given the safety-adjacent nature of the product, confirm whether a plain-language disclaimer is needed stating NimbusWatch relays public data and is not an official emergency notification system (this is the open legal question flagged in the PRD)
 - [ ] GDPR/CCPA considerations addressed if any non-US users are expected, even though weather coverage is US-only for MVP
 - [ ] Accessibility: keyboard nav works, contrast passes AA (see UI/UX Notes §6)
 

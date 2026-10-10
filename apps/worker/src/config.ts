@@ -7,7 +7,7 @@ const schema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   NASA_FIRMS_MAP_KEY: z.string().optional(),
   AIRNOW_API_KEY: z.string().optional(),
-  NWS_USER_AGENT: z.string().min(1).default('(AllClear worker, unknown-contact)'),
+  NWS_USER_AGENT: z.string().min(1).default('(NimbusWatch worker, unknown-contact)'),
   NIFC_INCIDENTS_URL: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM: z.string().optional(),

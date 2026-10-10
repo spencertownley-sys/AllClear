@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import type { OfficialAlertDTO } from '@allclear/shared';
+import type { OfficialAlertDTO } from '@nimbuswatch/shared';
 
 /** Compact, prominent pointer to active official alerts at the top of Location Detail. */
 export function ActiveAlertBanner({ alerts }: { alerts: OfficialAlertDTO[] }) {

@@ -1,4 +1,4 @@
-import { FORECAST_DAYS, type WeatherDaily, type WeatherHourly, type WeeklySummary } from '@allclear/shared';
+import { FORECAST_DAYS, type WeatherDaily, type WeatherHourly, type WeeklySummary } from '@nimbuswatch/shared';
 
 /** NWS hours first (official, richer text), then Open-Meteo hours after the last NWS hour. Drops hours already past. */
 export function mergeHourly(nws: WeatherHourly[], extended: WeatherHourly[], now = new Date()): WeatherHourly[] {

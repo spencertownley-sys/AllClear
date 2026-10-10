@@ -26,8 +26,8 @@ export async function sendEmail(
       from: config.RESEND_FROM!,
       to,
       subject,
-      text: `${body}\n\nOpen AllClear: ${url}\n\nAllClear relays public data from NWS, NASA FIRMS, USGS, AirNow and NIFC. It is not an official emergency notification system.`,
-      html: `<p style="font:16px/1.5 system-ui,sans-serif;color:#0f172a">${escapeHtml(body)}</p><p><a href="${url}" style="font:14px system-ui,sans-serif;color:#0f6b66">Open AllClear</a></p><p style="font:12px system-ui,sans-serif;color:#64748b">AllClear relays public data from NWS, NASA FIRMS, USGS, AirNow and NIFC. It is not an official emergency notification system.</p>`,
+      text: `${body}\n\nOpen NimbusWatch: ${url}\n\nNimbusWatch relays public data from NWS, NASA FIRMS, USGS, AirNow and NIFC. It is not an official emergency notification system.`,
+      html: `<p style="font:16px/1.5 system-ui,sans-serif;color:#0f172a">${escapeHtml(body)}</p><p><a href="${url}" style="font:14px system-ui,sans-serif;color:#0f6b66">Open NimbusWatch</a></p><p style="font:12px system-ui,sans-serif;color:#64748b">NimbusWatch relays public data from NWS, NASA FIRMS, USGS, AirNow and NIFC. It is not an official emergency notification system.</p>`,
     });
     if (error) {
       log.warn('email send failed', { to, error: error.message });

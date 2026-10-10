@@ -1,5 +1,5 @@
 import 'server-only';
-import type { DashboardSummaryRow, WatchLocation } from '@allclear/shared';
+import type { DashboardSummaryRow, WatchLocation } from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
 import { listLocations } from './locations';
 

@@ -1,4 +1,4 @@
-import { CELL_SIZE_DEG, cellKey, type WeatherOutlook, type WeatherOutlookPeriod } from '@allclear/shared';
+import { CELL_SIZE_DEG, cellKey, type WeatherOutlook, type WeatherOutlookPeriod } from '@nimbuswatch/shared';
 import { fetchJson } from '../http';
 import { cellsFor, type Cell } from '../cells';
 import { getWatchLocations, upsertWeather, type WeatherInsert } from '../db';

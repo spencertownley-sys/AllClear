@@ -1,5 +1,5 @@
 import webpush from 'web-push';
-import type { PushSubscriptionRow, TypedSupabaseClient } from '@allclear/shared';
+import type { PushSubscriptionRow, TypedSupabaseClient } from '@nimbuswatch/shared';
 import type { WorkerConfig } from '../config';
 import { log, errorFields } from '../logger';
 

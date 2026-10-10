@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'AllClear',
-    short_name: 'AllClear',
+    name: 'NimbusWatch',
+    short_name: 'NimbusWatch',
     description: 'Weather, wildfire, earthquake, air-quality and official-alert status for the places you care about.',
     start_url: '/dashboard',
     display: 'standalone',

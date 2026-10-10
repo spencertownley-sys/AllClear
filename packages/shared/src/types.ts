@@ -209,7 +209,7 @@ export interface PollerRun {
   details: Record<string, unknown>;
 }
 
-// ---------- API DTOs (see docs/AllClear-API_DESIGN.md) ----------
+// ---------- API DTOs (see docs/NimbusWatch-API_DESIGN.md) ----------
 
 export interface LocationDTO {
   id: string;

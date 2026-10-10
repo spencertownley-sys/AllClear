@@ -1,4 +1,4 @@
-import { CELL_SIZE_DEG, cellCenter, cellKey, type LatLng, type LayerType } from '@allclear/shared';
+import { CELL_SIZE_DEG, cellCenter, cellKey, type LatLng, type LayerType } from '@nimbuswatch/shared';
 import type { WatchLocationWithLayers } from './db';
 
 export interface Cell extends LatLng {

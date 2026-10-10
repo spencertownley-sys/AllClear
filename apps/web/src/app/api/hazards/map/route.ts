@@ -1,4 +1,4 @@
-import { mapQuerySchema } from '@allclear/shared';
+import { mapQuerySchema } from '@nimbuswatch/shared';
 import { parseSearchParams } from '@/lib/api/parse';
 import { LIMITS, clientIp, enforceRateLimit } from '@/lib/api/rate-limit';
 import { json, withErrorHandling } from '@/lib/api/respond';

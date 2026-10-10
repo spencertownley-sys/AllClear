@@ -1,4 +1,4 @@
-import { createCheckinSchema } from '@allclear/shared';
+import { createCheckinSchema } from '@nimbuswatch/shared';
 import { authed } from '@/lib/api/context';
 import { assertUuid, parseJsonBody } from '@/lib/api/parse';
 import { json, withErrorHandling } from '@/lib/api/respond';
