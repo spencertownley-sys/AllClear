@@ -117,6 +117,7 @@ export function AppShell({ user, children }: AppShellProps) {
       {user ? (
         <nav
           aria-label="Primary"
+          data-bottom-nav
           className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
         >
           <ul className="grid grid-cols-4">

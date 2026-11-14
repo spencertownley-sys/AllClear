@@ -29,6 +29,9 @@ export function SiteFooter() {
         <Link href="/cookies" className="hover:text-slate-700">
           Cookies
         </Link>
+        <button type="button" data-cookie-settings className="hover:text-slate-700">
+          Cookie settings
+        </button>
       </nav>
     </footer>
   );

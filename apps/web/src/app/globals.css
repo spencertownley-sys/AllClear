@@ -45,6 +45,14 @@ body {
   outline-offset: 2px;
 }
 
+/* Keep the cookie notice (public/cookie-banner.css) above the signed-in phone tab bar:
+   min-h-14 (56px) plus its 1px top border, plus the safe area. */
+@media (max-width: 767px) {
+  body:has([data-bottom-nav]) .cb {
+    --cb-bottom: calc(57px + env(safe-area-inset-bottom));
+  }
+}
+
 /* Leaflet containers need an explicit height; utilities set it per usage. */
 .leaflet-container {
   font-family: inherit;

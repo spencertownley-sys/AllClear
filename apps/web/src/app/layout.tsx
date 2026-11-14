@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
+// The cookie notice's own stylesheet (kept verbatim apart from theme variables in public/), bundled
+// by Next so it is served from our origin without a manual <link> tag.
+import '../../public/cookie-banner.css';
 import { SITE_URL } from '@/lib/site';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -40,6 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans">
         {children}
         <Toaster />
+        {/* Notice mode: only strictly necessary cookies and storage are used (see /cookies). Served from our own origin. */}
+        <Script src="/cookie-banner.js" strategy="afterInteractive" data-cookie-banner data-mode="notice" data-policy-url="/cookies" />
       </body>
     </html>
   );
