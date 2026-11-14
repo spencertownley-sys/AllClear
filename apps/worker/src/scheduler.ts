@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/node';
 import type { TypedSupabaseClient } from '@nimbuswatch/shared';
 import type { WorkerConfig } from './config';
 import { deleteExpired, recordRunEnd, recordRunStart } from './db';
+import { redactSecrets } from './http';
 import { log, errorFields } from './logger';
 import { evaluateRules } from './notify/evaluate';
 import { pollers, type Poller } from './pollers';
@@ -54,7 +55,8 @@ export class Scheduler {
         Sentry.captureException(error);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      // Belt and braces: never persist or expose an API key that slipped into an error message.
+      const message = redactSecrets(error instanceof Error ? error.message : String(error));
       await recordRunEnd(this.sb, runId, { status: 'error', rows_upserted: 0, error: message.slice(0, 2000), details: { ms: Date.now() - startedAt } });
       if (state) state.lastError = message;
       log.error('poller run failed', { source: poller.name, ...errorFields(error) });
@@ -87,14 +89,17 @@ export class Scheduler {
     if (this.cleanupTimer) clearInterval(this.cleanupTimer);
   }
 
-  /** Health view: a source is unhealthy when its last success is older than 3× its interval. */
-  status(now = Date.now()): { ok: boolean; sources: Array<{ source: string; enabled: boolean; lastSuccessAt: string | null; lastError: string | null; healthy: boolean }> } {
+  /**
+   * Health view: a source is unhealthy when its last success is older than 3× its interval.
+   * /health is unauthenticated, so error text stays out of it (it lives in poller_runs and logs).
+   */
+  status(now = Date.now()): { ok: boolean; sources: Array<{ source: string; enabled: boolean; lastSuccessAt: string | null; healthy: boolean }> } {
     const sources = this.jobs.map((job) => {
       const disabled = job.poller.disabledReason(this.config);
       const intervalMs = job.poller.intervalMinutes(this.config) * 60_000;
       const graceMs = Math.max(3 * intervalMs, 10 * 60_000);
       const healthy = disabled ? true : job.lastSuccessAt !== null ? now - job.lastSuccessAt.getTime() <= graceMs : now - startedAt <= graceMs;
-      return { source: job.poller.name, enabled: !disabled, lastSuccessAt: job.lastSuccessAt?.toISOString() ?? null, lastError: job.lastError, healthy };
+      return { source: job.poller.name, enabled: !disabled, lastSuccessAt: job.lastSuccessAt?.toISOString() ?? null, healthy };
     });
     return { ok: sources.every((s) => s.healthy), sources };
   }
