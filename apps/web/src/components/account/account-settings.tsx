@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
@@ -9,6 +9,7 @@ import type { LocationDTO } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
 import { createClient } from '@/lib/supabase/client';
 import { placeLine } from '@/lib/format';
+import { isRecentRecoverySession } from '@/lib/recovery-session';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/dialog';
@@ -22,28 +23,65 @@ interface Props {
 
 export function AccountSettings({ email, locations }: Props) {
   const router = useRouter();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [currentPasswordError, setCurrentPasswordError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  // Arrived from a password-reset email: they can't know the old password, so don't ask for it.
+  const [recovery, setRecovery] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<LocationDTO | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    void createClient()
+      .auth.getSession()
+      .then(({ data }) => {
+        if (!cancelled) setRecovery(isRecentRecoverySession(data.session?.access_token));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
+   * Changing the password needs the current one (NW-18), so someone with a moment on an unlocked,
+   * signed-in device can't lock the owner out. Users who just followed a reset link are the exception.
+   */
   async function changePassword(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) {
-      setPasswordError('Use at least 8 characters');
-      return;
-    }
-    setPasswordError(null);
+    const currentError = !recovery && !currentPassword ? 'Enter your current password' : null;
+    const newError = password.length < 8 ? 'Use at least 8 characters' : null;
+    setCurrentPasswordError(currentError);
+    setPasswordError(newError);
+    if (currentError || newError) return;
     setSavingPassword(true);
+    const supabase = createClient();
     try {
-      const { error } = await createClient().auth.updateUser({ password });
-      if (error) throw error;
+      if (!recovery) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password: currentPassword });
+        if (error) {
+          console.error('[account] current password check failed', error.message);
+          setCurrentPasswordError('That password is not right.');
+          return;
+        }
+      }
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        console.error('[account] password update failed', error.message);
+        toast.error(
+          error.code === 'weak_password' || error.code === 'same_password'
+            ? 'Choose a different, harder to guess password.'
+            : 'Could not update your password. Please try again.',
+        );
+        return;
+      }
+      setCurrentPassword('');
       setPassword('');
+      setRecovery(false);
       toast.success('Password updated');
-    } catch (err) {
-      toast.error(errorMessage(err));
     } finally {
       setSavingPassword(false);
     }
@@ -86,6 +124,23 @@ export function AccountSettings({ email, locations }: Props) {
         </CardHeader>
         <CardContent>
           <form onSubmit={changePassword} className="flex flex-col gap-3 md:max-w-sm" noValidate>
+            {recovery ? (
+              <p className="text-sm text-slate-600">You opened a password reset link. Choose a new password below.</p>
+            ) : (
+              <Field id="current-password" label="Current password" error={currentPasswordError}>
+                <Input
+                  id="current-password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  invalid={Boolean(currentPasswordError)}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+                <Link href="/forgot-password" className="text-xs text-primary underline-offset-2 hover:underline">
+                  Forgot your password?
+                </Link>
+              </Field>
+            )}
             <Field id="new-password" label="New password" error={passwordError} hint="At least 8 characters.">
               <Input
                 id="new-password"

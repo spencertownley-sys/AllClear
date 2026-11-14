@@ -141,6 +141,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           required
         />
       </Field>
+      {mode === 'login' ? (
+        <p className="-mt-2 text-sm">
+          <Link href="/forgot-password" className="font-medium text-primary underline-offset-2 hover:underline">
+            Forgot your password?
+          </Link>
+        </p>
+      ) : null}
       {formError ? (
         <p role="alert" className="rounded-control border border-alert/30 bg-alert-soft px-3 py-2 text-sm text-alert-foreground">
           {formError}
