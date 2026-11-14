@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PROTECTED_PREFIXES = ['/dashboard', '/alerts', '/settings', '/onboarding'];
+const AUTH_PAGES = ['/login', '/signup'];
 
 /**
  * Once NEXT_PUBLIC_SITE_URL names a custom domain, visits to the generated *.up.railway.app host get a
@@ -21,7 +22,6 @@ function canonicalRedirect(request: NextRequest): NextResponse | null {
   const url = new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, target.origin);
   return NextResponse.redirect(url, 308);
 }
-const AUTH_PAGES = ['/login', '/signup'];
 
 function startsWithAny(path: string, prefixes: string[]): boolean {
   return prefixes.some((p) => path === p || path.startsWith(`${p}/`));
