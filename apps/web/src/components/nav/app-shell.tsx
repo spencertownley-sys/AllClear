@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bell, LayoutDashboard, Map, Settings, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { unsubscribeFromPush } from '@/lib/push-client';
 import { Button } from '@/components/ui/button';
 import { SiteFooter } from '@/components/nav/site-footer';
 
@@ -22,6 +23,21 @@ const TABS = [
   { href: '/alerts', label: 'Alerts', icon: Bell, auth: true },
   { href: '/settings', label: 'Settings', icon: Settings, auth: true },
 ] as const;
+
+/**
+ * Turn off this browser's push subscription before signing out, so the next person on a shared
+ * device doesn't keep getting the previous user's alerts (NW-15). Never blocks sign-out for long.
+ */
+async function signOut(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  try {
+    await Promise.race([unsubscribeFromPush(), new Promise((resolve) => setTimeout(resolve, 3000))]);
+  } catch (error) {
+    console.error('[push] unsubscribe on sign-out failed', error);
+  }
+  form.submit(); // submit() does not fire onSubmit again
+}
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -73,7 +89,7 @@ export function AppShell({ user, children }: AppShellProps) {
                 <span className="hidden max-w-[200px] truncate text-sm text-slate-500 md:inline" title={user.email ?? ''}>
                   {user.email}
                 </span>
-                <form action="/auth/signout" method="post">
+                <form action="/auth/signout" method="post" onSubmit={signOut}>
                   <Button variant="ghost" size="sm" type="submit">
                     Log out
                   </Button>
