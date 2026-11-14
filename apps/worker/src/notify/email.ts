@@ -71,8 +71,9 @@ export async function sendEmail(
   subject: string,
   body: string,
   url: string,
-  ruleId: string,
+  ids: { ruleId: string; userId: string },
 ): Promise<boolean> {
+  const { ruleId, userId } = ids;
   if (!emailEnabled(config)) return false;
   if (!client) client = new Resend(config.RESEND_API_KEY);
   const appUrl = config.APP_URL.replace(/\/$/, '');
@@ -93,12 +94,12 @@ export async function sendEmail(
   try {
     const { error } = await client.emails.send({ from: config.RESEND_FROM!, to, subject, text, html, headers });
     if (error) {
-      log.warn('email send failed', { to, error: error.message });
+      log.warn('email send failed', { userId, ruleId, error: error.message });
       return false;
     }
     return true;
   } catch (error) {
-    log.warn('email send threw', { to, ...errorFields(error) });
+    log.warn('email send threw', { userId, ruleId, ...errorFields(error) });
     return false;
   }
 }

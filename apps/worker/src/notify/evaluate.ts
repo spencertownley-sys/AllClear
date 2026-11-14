@@ -145,7 +145,7 @@ export async function evaluateRules(sb: TypedSupabaseClient, config: WorkerConfi
         }
         if (wantsEmail && emailEnabled(config)) {
           const email = await emailFor(sb, location.user_id);
-          if (email && (await sendEmail(config, email, `NimbusWatch: ${summary}`, summary, url, rule.id))) delivered.push('email');
+          if (email && (await sendEmail(config, email, `NimbusWatch: ${summary}`, summary, url, { ruleId: rule.id, userId: location.user_id }))) delivered.push('email');
         }
         if (delivered.length === 0) {
           // Nothing configured for delivery yet — still record it so the in-app history shows it once.
@@ -166,7 +166,8 @@ export async function evaluateRules(sb: TypedSupabaseClient, config: WorkerConfi
           if (logErr) log.warn('notifications_log insert failed', { rule: rule.id, error: logErr.message });
         }
         sent += 1;
-        log.info('notification sent', { rule: rule.id, layer: rule.layer_type, channels: delivered, summary });
+        // No summary here: it contains the user's own place label (personal data stays out of logs).
+        log.info('notification sent', { rule: rule.id, user: location.user_id, layer: rule.layer_type, channels: delivered });
       }
     } catch (error) {
       log.error('rule evaluation failed', { rule: rule.id, ...errorFields(error) });
