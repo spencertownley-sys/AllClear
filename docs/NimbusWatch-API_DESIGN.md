@@ -264,7 +264,7 @@ All errors follow a consistent shape:
 | 401 | `UNAUTHORIZED` | Not authenticated |
 | 403 | `FORBIDDEN` | Authenticated but this resource belongs to another user |
 | 404 | `NOT_FOUND` | Resource doesn't exist |
-| 409 | `CONFLICT` | Duplicate or state conflict (e.g., duplicate notification rule) |
+| 409 | `CONFLICT` | Duplicate or state conflict (e.g., duplicate notification rule, or a per-account limit reached: 25 locations, 50 notification rules, 10 push subscriptions) |
 | 429 | `RATE_LIMITED` | Too many requests |
 | 500 | `INTERNAL_ERROR` | Server error |
 

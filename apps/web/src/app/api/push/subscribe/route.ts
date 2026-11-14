@@ -1,4 +1,4 @@
-import { ApiError, pushSubscriptionSchema } from '@nimbuswatch/shared';
+import { ApiError, LIMIT_SQLSTATE, MAX_PUSH_SUBSCRIPTIONS_PER_USER, pushSubscriptionSchema } from '@nimbuswatch/shared';
 import { z } from 'zod';
 import { authed } from '@/lib/api/context';
 import { parseJsonBody } from '@/lib/api/parse';
@@ -19,6 +19,12 @@ export const POST = withErrorHandling(async (request) => {
     },
     { onConflict: 'endpoint' },
   );
+  if (error?.code === LIMIT_SQLSTATE) {
+    throw new ApiError(
+      'CONFLICT',
+      `Push notifications are on for ${MAX_PUSH_SUBSCRIPTIONS_PER_USER} browsers already. Turn them off on one to add another.`,
+    );
+  }
   if (error) {
     console.error('[push] subscribe failed', error);
     throw new ApiError('INTERNAL_ERROR', 'Could not save your push subscription');

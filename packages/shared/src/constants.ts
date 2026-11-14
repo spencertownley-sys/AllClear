@@ -95,6 +95,16 @@ export const RADIUS_LIMITS = { min: 1, max: 500 } as const;
 export const MAGNITUDE_LIMITS = { min: 0, max: 10 } as const;
 export const AQI_LIMITS = { min: 0, max: 500 } as const;
 
+/**
+ * Fair-use limits per account (NW-05). Enforced by the API for a friendly error and by BEFORE INSERT
+ * triggers (supabase/migrations/20261114000100_per_user_limits.sql) for direct PostgREST writes.
+ */
+export const MAX_LOCATIONS_PER_USER = 25;
+export const MAX_RULES_PER_USER = 50;
+export const MAX_PUSH_SUBSCRIPTIONS_PER_USER = 10;
+/** SQLSTATE raised by the limit triggers. */
+export const LIMIT_SQLSTATE = 'NWLIM';
+
 /** Which condition types are valid for which notification layer. */
 export const VALID_RULE_COMBOS: Record<NotificationLayerType, readonly ConditionType[]> = {
   wildfire: ['distance_threshold_miles'],
