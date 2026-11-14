@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight, Bell, MapPinned, ShieldCheck, Layers } from 'lucide-react';
@@ -6,6 +7,8 @@ import { getOptionalUser } from '@/lib/supabase/server';
 import { AppShell } from '@/components/nav/app-shell';
 import { Button } from '@/components/ui/button';
 import { LiveMap } from '@/components/map/live-map';
+
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 /** Marketing / landing (logged out). Logged-in users go straight to their dashboard. */
 export default async function LandingPage() {

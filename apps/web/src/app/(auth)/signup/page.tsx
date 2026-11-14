@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { AuthForm } from '@/components/auth/auth-form';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export const metadata: Metadata = { title: 'Sign up' };
+export const metadata: Metadata = { title: 'Sign up', alternates: { canonical: '/signup' } };
 
 export default function SignupPage() {
   return (

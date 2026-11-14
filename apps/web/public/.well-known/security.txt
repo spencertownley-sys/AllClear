@@ -1,0 +1,4 @@
+Contact: mailto:[PLACEHOLDER: security contact email]
+Expires: 2027-11-13T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://web-production-41f16.up.railway.app/.well-known/security.txt

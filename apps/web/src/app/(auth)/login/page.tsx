@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { AuthForm } from '@/components/auth/auth-form';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export const metadata: Metadata = { title: 'Log in' };
+export const metadata: Metadata = { title: 'Log in', alternates: { canonical: '/login' } };
 
 export default function LoginPage() {
   return (

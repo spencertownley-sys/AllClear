@@ -4,7 +4,7 @@ import { LiveMap } from '@/components/map/live-map';
 import { PageHeader } from '@/components/ui/page-header';
 import { SafetyDisclaimer } from '@/components/ui/safety-disclaimer';
 
-export const metadata: Metadata = { title: 'Live map' };
+export const metadata: Metadata = { title: 'Live map', alternates: { canonical: '/map' } };
 
 export default async function MapPage() {
   const user = await getOptionalUser();

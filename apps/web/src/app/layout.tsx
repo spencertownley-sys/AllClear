@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { SITE_URL } from '@/lib/site';
 import { Toaster } from '@/components/ui/toaster';
 
 // Self-hosted by next/font: downloaded at build time and served from our own origin, so page views
@@ -12,8 +13,17 @@ export const metadata: Metadata = {
   description:
     'One calm dashboard for weather, wildfire, earthquake, air-quality and official-alert status at the places you care about — every fact sourced from NWS, NASA FIRMS, USGS and AirNow.',
   applicationName: 'NimbusWatch',
+  metadataBase: new URL(SITE_URL),
   manifest: '/manifest.webmanifest',
-  icons: { icon: '/icon.svg' },
+  // Icons and the share image come from the file conventions in this folder: icon.svg, favicon.ico,
+  // apple-icon.png and opengraph-image.png (1200x630). Canonical URLs are set per public page.
+  openGraph: {
+    siteName: 'NimbusWatch',
+    type: 'website',
+    title: 'NimbusWatch',
+    description: 'Weather, wildfire, earthquake, air-quality and official-alert status for the places you care about, every fact sourced.',
+  },
+  twitter: { card: 'summary_large_image' },
   appleWebApp: { capable: true, title: 'NimbusWatch', statusBarStyle: 'default' },
 };
 
