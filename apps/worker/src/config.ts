@@ -15,6 +15,10 @@ const schema = z.object({
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().optional(),
   APP_URL: z.string().default('http://localhost:3000'),
+  /** HMAC key for one-click unsubscribe links in alert emails; the web app needs the same value. */
+  UNSUBSCRIBE_SECRET: z.string().min(16).optional(),
+  /** Sender's postal address, shown in every alert email (CAN-SPAM). */
+  MAIL_POSTAL_ADDRESS: z.string().min(1).optional(),
   SENTRY_DSN: z.string().optional(),
   PORT: z.coerce.number().int().positive().default(8080),
   POLL_USGS_MINUTES: minutes(2),

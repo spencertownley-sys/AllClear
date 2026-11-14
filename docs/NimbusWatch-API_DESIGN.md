@@ -242,6 +242,12 @@ List the authenticated user's notification history, most recent first.
 }
 ```
 
+### GET /api/notifications/unsubscribe?t=TOKEN
+Linked from every alert email. No session needed: `t` is `<rule id>.<HMAC-SHA256>` signed with `UNSUBSCRIBE_SECRET`. GET changes nothing; it answers `303` to the confirm page `/unsubscribe?t=TOKEN`.
+
+### POST /api/notifications/unsubscribe?t=TOKEN
+Turns off email for that one rule (`both` becomes `web_push`; an `email` rule is disabled). Supports RFC 8058 one-click (`List-Unsubscribe-Post: List-Unsubscribe=One-Click`), answered with `200 { "ok": true }`; the confirm page's form (`from=page`) gets a `303` to `/unsubscribe?done=1`. An invalid token returns `400 VALIDATION_ERROR`. Idempotent.
+
 ---
 
 ## 8. Error Format
