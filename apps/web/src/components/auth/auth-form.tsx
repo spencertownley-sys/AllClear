@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { hasSupabaseConfig } from '@/lib/env';
+import { safeNext } from '@/lib/safe-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
@@ -24,10 +25,6 @@ function validatePassword(value: string, mode: 'login' | 'signup'): string | nul
   if (!value) return 'Enter your password';
   if (mode === 'signup' && value.length < 8) return 'Use at least 8 characters';
   return null;
-}
-
-function safeNext(value: string | null): string {
-  return value && value.startsWith('/') && !value.startsWith('//') ? value : '';
 }
 
 /** Centred email/password form with inline validation on blur (UI/UX Notes §3, §5). */
