@@ -53,7 +53,7 @@ export default async function LandingPage() {
           {
             icon: Layers,
             title: 'Pick the layers that matter',
-            body: 'Weather, wildfire & smoke, earthquakes and air quality — per place. Official alerts are always on as the safety net.',
+            body: 'Weather, wildfire & smoke, earthquakes and air quality, per place. Official NWS alerts are always shown. NimbusWatch is not an emergency alert system.',
           },
           {
             icon: Bell,
