@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { MapPin, Search } from 'lucide-react';
 import type { GeocodeResult } from '@nimbuswatch/shared';
 import { apiFetch, errorMessage } from '@/lib/api-client';
@@ -15,7 +15,7 @@ interface LocationSearchProps {
   selected: GeocodeResult | null;
 }
 
-/** Address/city search with autocomplete, or drop a pin on a map (PRD §3.1). */
+/** Address/city search (on submit), or drop a pin on a map (PRD §3.1). */
 export function LocationSearch({ onSelect, selected }: LocationSearchProps) {
   const [mode, setMode] = useState<'search' | 'pin'>('search');
   const [query, setQuery] = useState('');
@@ -23,40 +23,40 @@ export function LocationSearch({ onSelect, selected }: LocationSearchProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pinBusy, setPinBusy] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestId = useRef(0);
 
-  useEffect(() => {
-    if (mode !== 'search') return;
+  // Search only on submit (Enter or the Search button), never per keystroke: every request goes to
+  // OpenStreetMap Nominatim, whose usage policy forbids autocomplete and allows about 1 request/second.
+  async function runSearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const q = query.trim();
-    if (q.length < 2) return;
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(async () => {
-      const id = ++requestId.current;
-      setLoading(true);
-      try {
-        const { data } = await apiFetch<{ data: GeocodeResult[] }>(`/api/geocode?q=${encodeURIComponent(q)}`);
-        if (id !== requestId.current) return;
-        setResults(data);
-        setError(data.length === 0 ? "Couldn't find that location. Try adding a state, e.g. “Bend, OR”." : null);
-      } catch (err) {
-        if (id !== requestId.current) return;
-        setError(errorMessage(err));
-      } finally {
-        if (id === requestId.current) setLoading(false);
-      }
-    }, 350);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, [query, mode]);
+    if (q.length < 2) {
+      setResults([]);
+      setError('Type at least 2 characters, e.g. “Bend, OR”.');
+      return;
+    }
+    const id = ++requestId.current;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await apiFetch<{ data: GeocodeResult[] }>(`/api/geocode?q=${encodeURIComponent(q)}`);
+      if (id !== requestId.current) return;
+      setResults(data);
+      setError(data.length === 0 ? "Couldn't find that location. Try adding a state, e.g. “Bend, OR”." : null);
+    } catch (err) {
+      if (id !== requestId.current) return;
+      setError(errorMessage(err));
+    } finally {
+      if (id === requestId.current) setLoading(false);
+    }
+  }
 
   function onQueryChange(value: string) {
     setQuery(value);
+    setError(null);
     if (value.trim().length < 2) {
       requestId.current += 1;
       setResults([]);
-      setError(null);
       setLoading(false);
     }
   }
@@ -113,19 +113,30 @@ export function LocationSearch({ onSelect, selected }: LocationSearchProps) {
 
       {mode === 'search' ? (
         <div className="flex flex-col gap-2">
-          <label htmlFor="location-query" className="text-sm font-medium text-slate-800">
-            City or address
-          </label>
-          <Input
-            id="location-query"
-            placeholder="e.g. Bend, OR or 123 Main St, Boise"
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            autoComplete="off"
-            autoFocus
-            aria-describedby={error ? 'location-query-error' : undefined}
-            invalid={Boolean(error)}
-          />
+          <form onSubmit={runSearch} role="search" className="flex flex-col gap-2">
+            <label htmlFor="location-query" className="text-sm font-medium text-slate-800">
+              City or address
+            </label>
+            <div className="flex gap-2">
+              <Input
+                id="location-query"
+                placeholder="e.g. Bend, OR or 123 Main St, Boise"
+                value={query}
+                onChange={(e) => onQueryChange(e.target.value)}
+                autoComplete="off"
+                autoFocus
+                enterKeyHint="search"
+                aria-describedby={error ? 'location-query-error' : 'location-query-hint'}
+                invalid={Boolean(error)}
+              />
+              <Button type="submit" variant="secondary" disabled={loading}>
+                <Search className="h-4 w-4" aria-hidden /> Search
+              </Button>
+            </div>
+            <p id="location-query-hint" className="text-xs text-slate-500">
+              Press Enter or Search to look it up.
+            </p>
+          </form>
           {loading ? (
             <ul className="flex flex-col gap-2" aria-busy="true" aria-label="Searching">
               <li><Skeleton className="h-11 w-full" /></li>

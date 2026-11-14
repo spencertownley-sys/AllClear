@@ -23,7 +23,14 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/alerts';
+  let url = (event.notification.data && event.notification.data.url) || '/alerts';
+  // Only ever open pages on this site, whatever the payload says.
+  try {
+    const target = new URL(url, self.location.origin);
+    url = target.origin === self.location.origin ? target.href : '/alerts';
+  } catch {
+    url = '/alerts';
+  }
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {

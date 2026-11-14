@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Design tokens — UI/UX Notes §2. Teal is calm and distinct from alarm-red; amber and red are
      reserved for warning and danger states only. */
@@ -43,6 +43,14 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Keep the cookie notice (public/cookie-banner.css) above the signed-in phone tab bar:
+   min-h-14 (56px) plus its 1px top border, plus the safe area. */
+@media (max-width: 767px) {
+  body:has([data-bottom-nav]) .cb {
+    --cb-bottom: calc(57px + env(safe-area-inset-bottom));
+  }
 }
 
 /* Leaflet containers need an explicit height; utilities set it per usage. */

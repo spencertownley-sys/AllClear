@@ -12,5 +12,10 @@ COPY packages/shared packages/shared
 COPY apps/worker apps/worker
 
 ENV NODE_ENV=production
+# Run as the image's unprivileged "node" user; the worker writes nothing under /app.
+# Start tsx directly (same as the package's "start" script): corepack's pnpm lives in root's home,
+# so calling pnpm as "node" would try to download it again on every start.
+USER node
 EXPOSE 8080
-CMD ["pnpm", "--filter", "@nimbuswatch/worker", "start"]
+WORKDIR /app/apps/worker
+CMD ["./node_modules/.bin/tsx", "src/index.ts"]

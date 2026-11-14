@@ -1,5 +1,5 @@
 import webpush from 'web-push';
-import type { PushSubscriptionRow, TypedSupabaseClient } from '@nimbuswatch/shared';
+import { isPushServiceEndpoint, type PushSubscriptionRow, type TypedSupabaseClient } from '@nimbuswatch/shared';
 import type { WorkerConfig } from '../config';
 import { log, errorFields } from '../logger';
 
@@ -39,6 +39,11 @@ export async function sendPush(
   ensureConfigured(config);
   let delivered = 0;
   for (const sub of subscriptions) {
+    // Never POST to anything but a real browser push service (rows predating the DB check, or bad data).
+    if (!isPushServiceEndpoint(sub.endpoint)) {
+      log.warn('push subscription endpoint is not a known push service; skipping', { id: sub.id });
+      continue;
+    }
     try {
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },

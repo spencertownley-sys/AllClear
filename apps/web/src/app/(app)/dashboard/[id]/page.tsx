@@ -11,6 +11,7 @@ import { layerContext, loadAirQuality, loadAlerts, loadEarthquakes, loadStorms, 
 import { listCheckins } from '@/lib/data/safety';
 import { placeLine } from '@/lib/format';
 import { PageHeader } from '@/components/ui/page-header';
+import { SafetyDisclaimer } from '@/components/ui/safety-disclaimer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SectionErrorBoundary } from '@/components/ui/section-error-boundary';
 import { LocationActions } from '@/components/location/location-actions';
@@ -97,6 +98,7 @@ export default async function LocationDetailPage({ params, searchParams }: Param
 
   return (
     <>
+      <SafetyDisclaimer variant="compact" className="mb-4" />
       <PageHeader
         back={
           <Link href="/dashboard" className="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">

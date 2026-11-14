@@ -242,6 +242,12 @@ List the authenticated user's notification history, most recent first.
 }
 ```
 
+### GET /api/notifications/unsubscribe?t=TOKEN
+Linked from every alert email. No session needed: `t` is `<rule id>.<HMAC-SHA256>` signed with `UNSUBSCRIBE_SECRET`. GET changes nothing; it answers `303` to the confirm page `/unsubscribe?t=TOKEN`.
+
+### POST /api/notifications/unsubscribe?t=TOKEN
+Turns off email for that one rule (`both` becomes `web_push`; an `email` rule is disabled). Supports RFC 8058 one-click (`List-Unsubscribe-Post: List-Unsubscribe=One-Click`), answered with `200 { "ok": true }`; the confirm page's form (`from=page`) gets a `303` to `/unsubscribe?done=1`. An invalid token returns `400 VALIDATION_ERROR`. Idempotent.
+
 ---
 
 ## 8. Error Format
@@ -264,7 +270,7 @@ All errors follow a consistent shape:
 | 401 | `UNAUTHORIZED` | Not authenticated |
 | 403 | `FORBIDDEN` | Authenticated but this resource belongs to another user |
 | 404 | `NOT_FOUND` | Resource doesn't exist |
-| 409 | `CONFLICT` | Duplicate or state conflict (e.g., duplicate notification rule) |
+| 409 | `CONFLICT` | Duplicate or state conflict (e.g., duplicate notification rule, or a per-account limit reached: 25 locations, 50 notification rules, 10 push subscriptions) |
 | 429 | `RATE_LIMITED` | Too many requests |
 | 500 | `INTERNAL_ERROR` | Server error |
 

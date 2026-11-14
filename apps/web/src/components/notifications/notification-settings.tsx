@@ -7,6 +7,7 @@ import { placeLine } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { RuleEditor } from './rule-editor';
 import { PushEnable } from './push-enable';
+import { SafetyDisclaimer } from '@/components/ui/safety-disclaimer';
 
 interface LocationWithRules extends LocationDTO {
   rules: NotificationRuleDTO[];
@@ -41,6 +42,7 @@ export function NotificationSettings({ locations, focusLocationId }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <PushEnable hasRules={hasRules} />
+      <SafetyDisclaimer />
       <ul className="flex flex-col gap-3">
         {locations.map((location) => {
           const expanded = open.has(location.id);

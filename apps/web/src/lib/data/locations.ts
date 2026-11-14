@@ -1,6 +1,8 @@
 import 'server-only';
 import {
   ApiError,
+  LIMIT_SQLSTATE,
+  MAX_LOCATIONS_PER_USER,
   type CreateLocationInput,
   type LocationDTO,
   type TablesUpdate,
@@ -61,6 +63,10 @@ export async function createLocation(
   userId: string,
   input: CreateLocationInput,
 ): Promise<WatchLocation> {
+  const existing = await countLocations(supabase);
+  if (existing >= MAX_LOCATIONS_PER_USER) {
+    throw new ApiError('CONFLICT', `You can save up to ${MAX_LOCATIONS_PER_USER} places. Remove one to add another.`);
+  }
   const { data, error } = await supabase
     .from('watch_locations')
     .insert({
@@ -76,6 +82,10 @@ export async function createLocation(
     })
     .select('*')
     .single();
+  if (error?.code === LIMIT_SQLSTATE) {
+    // The database trigger is the backstop for races between the count above and the insert.
+    throw new ApiError('CONFLICT', `You can save up to ${MAX_LOCATIONS_PER_USER} places. Remove one to add another.`);
+  }
   if (error || !data) {
     console.error('[locations] create failed', error);
     throw new ApiError('INTERNAL_ERROR', 'Could not save that location');

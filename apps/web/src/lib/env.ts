@@ -24,6 +24,10 @@ export const serverEnv = {
   get serviceRoleKey(): string | undefined {
     return process.env.SUPABASE_SERVICE_ROLE_KEY || undefined;
   },
+  /** HMAC key for one-click unsubscribe links in alert emails; must match the worker's value. */
+  get unsubscribeSecret(): string | undefined {
+    return process.env.UNSUBSCRIBE_SECRET || undefined;
+  },
   get nwsUserAgent(): string {
     return process.env.NWS_USER_AGENT || '(NimbusWatch, unknown-contact)';
   },

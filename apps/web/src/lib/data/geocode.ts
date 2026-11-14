@@ -1,6 +1,7 @@
 import 'server-only';
 import { ApiError, type GeocodeResult } from '@nimbuswatch/shared';
 import { serverEnv } from '@/lib/env';
+import { LruCache, QueueFullError, createIntervalGate, normalizeQuery } from './geocode-cache';
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org';
 
@@ -11,13 +12,22 @@ interface NominatimResult {
   address?: Record<string, string>;
 }
 
-// Nominatim's usage policy asks for ≤ 1 request/second and an identifying User-Agent.
-let lastRequestAt = 0;
+// Nominatim's usage policy asks for ≤ 1 request/second, an identifying User-Agent and caching of
+// results. Repeated lookups come from memory; at most 5 requests wait for a slot and the rest are
+// turned away with RATE_LIMITED instead of stalling search for everyone.
+const gate = createIntervalGate(1000, 5);
+const searchCache = new LruCache<GeocodeResult[]>(500, 24 * 3_600_000);
+const reverseCache = new LruCache<GeocodeResult | null>(500, 24 * 3_600_000);
+
 async function throttle() {
-  const now = Date.now();
-  const wait = Math.max(0, lastRequestAt + 1000 - now);
-  lastRequestAt = now + wait;
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  try {
+    await gate.acquire();
+  } catch (error) {
+    if (error instanceof QueueFullError) {
+      throw new ApiError('RATE_LIMITED', 'Location search is busy right now. Please try again in a few seconds.');
+    }
+    throw error;
+  }
 }
 
 function toResult(item: NominatimResult): GeocodeResult {
@@ -48,6 +58,9 @@ async function nominatim(path: string, params: Record<string, string>): Promise<
 }
 
 export async function searchPlaces(query: string): Promise<GeocodeResult[]> {
+  const key = normalizeQuery(query);
+  const cached = searchCache.get(key);
+  if (cached) return cached;
   const data = (await nominatim('/search', {
     q: query,
     format: 'jsonv2',
@@ -55,10 +68,16 @@ export async function searchPlaces(query: string): Promise<GeocodeResult[]> {
     addressdetails: '1',
     countrycodes: 'us',
   })) as NominatimResult[];
-  return (Array.isArray(data) ? data : []).map(toResult).filter((r) => Number.isFinite(r.latitude));
+  const results = (Array.isArray(data) ? data : []).map(toResult).filter((r) => Number.isFinite(r.latitude));
+  searchCache.set(key, results);
+  return results;
 }
 
 export async function reversePlace(lat: number, lng: number): Promise<GeocodeResult | null> {
+  // ~100 m grid: a reverse lookup at zoom 10 (city level) gives the same answer within it.
+  const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+  const cached = reverseCache.get(key);
+  if (cached !== undefined) return cached;
   const data = (await nominatim('/reverse', {
     lat: String(lat),
     lon: String(lng),
@@ -66,6 +85,7 @@ export async function reversePlace(lat: number, lng: number): Promise<GeocodeRes
     addressdetails: '1',
     zoom: '10',
   })) as NominatimResult & { error?: string };
-  if (!data || data.error || !data.lat) return null;
-  return toResult(data);
+  const result = !data || data.error || !data.lat ? null : toResult(data);
+  reverseCache.set(key, result);
+  return result;
 }

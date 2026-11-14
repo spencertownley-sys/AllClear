@@ -6,6 +6,7 @@ import { getDashboard } from '@/lib/data/dashboard';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { SafetyDisclaimer } from '@/components/ui/safety-disclaimer';
 import { LocationCard } from '@/components/dashboard/location-card';
 
 export const metadata: Metadata = { title: 'Dashboard' };
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
 
   return (
     <>
+      <SafetyDisclaimer variant="compact" className="mb-4" />
       <PageHeader
         title="Your Watch List"
         description={cards.length ? 'Tap a place for the full breakdown.' : undefined}

@@ -12,12 +12,12 @@ concurrency:
 jobs:
   verify:
     name: Typecheck, lint, test, build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       # pnpm version comes from the "packageManager" field in package.json
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: pnpm
@@ -35,12 +35,14 @@ jobs:
     name: Apply Supabase migrations (main only)
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
-          version: latest
+          # Exact CLI version: this job pushes migrations to production, so a new CLI release must
+          # be a reviewed change, not something picked up silently. Last v2 release; bump deliberately.
+          version: 2.122.1
       - name: Push migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

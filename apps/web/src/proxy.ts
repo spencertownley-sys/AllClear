@@ -4,6 +4,25 @@ import { NextResponse, type NextRequest } from 'next/server';
 const PROTECTED_PREFIXES = ['/dashboard', '/alerts', '/settings', '/onboarding'];
 const AUTH_PAGES = ['/login', '/signup'];
 
+/**
+ * Once NEXT_PUBLIC_SITE_URL names a custom domain, visits to the generated *.up.railway.app host get a
+ * permanent redirect there (NW-21). Railway's own health checks use other hosts and are unaffected.
+ */
+function canonicalRedirect(request: NextRequest): NextResponse | null {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!configured) return null;
+  let target: URL;
+  try {
+    target = new URL(configured);
+  } catch {
+    return null;
+  }
+  const host = (request.headers.get('host') ?? '').toLowerCase().split(':')[0] ?? '';
+  if (!host.endsWith('.up.railway.app') || host === target.hostname) return null;
+  const url = new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, target.origin);
+  return NextResponse.redirect(url, 308);
+}
+
 function startsWithAny(path: string, prefixes: string[]): boolean {
   return prefixes.some((p) => path === p || path.startsWith(`${p}/`));
 }
@@ -14,6 +33,9 @@ function startsWithAny(path: string, prefixes: string[]): boolean {
  * Marketing and Map are public.
  */
 export async function proxy(request: NextRequest) {
+  const redirect = canonicalRedirect(request);
+  if (redirect) return redirect;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   let response = NextResponse.next({ request });
@@ -59,7 +81,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Skip static assets, the service worker and image files.
-    '/((?!_next/static|_next/image|favicon.ico|icon.svg|sw.js|manifest.webmanifest|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    // Skip static assets, the service worker, crawler files and image files.
+    '/((?!_next/static|_next/image|favicon.ico|icon.svg|sw.js|manifest.webmanifest|icons/|robots.txt|sitemap.xml|cookie-banner\\.(?:js|css)|\\.well-known/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

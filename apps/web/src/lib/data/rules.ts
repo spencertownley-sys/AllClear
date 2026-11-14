@@ -1,6 +1,8 @@
 import 'server-only';
 import {
   ApiError,
+  LIMIT_SQLSTATE,
+  MAX_RULES_PER_USER,
   validateRuleUpdate,
   type CreateRuleInput,
   type NotificationRule,
@@ -37,6 +39,11 @@ export async function createRule(
   locationId: string,
   input: CreateRuleInput,
 ): Promise<NotificationRuleDTO> {
+  // RLS scopes this count to the current user's rules across all of their places.
+  const { count } = await supabase.from('notification_rules').select('id', { count: 'exact', head: true });
+  if ((count ?? 0) >= MAX_RULES_PER_USER) {
+    throw new ApiError('CONFLICT', `You can have up to ${MAX_RULES_PER_USER} notification rules. Remove one to add another.`);
+  }
   const { data, error } = await supabase
     .from('notification_rules')
     .insert({
@@ -51,6 +58,9 @@ export async function createRule(
     .select('*')
     .single();
   if (error) {
+    if (error.code === LIMIT_SQLSTATE) {
+      throw new ApiError('CONFLICT', `You can have up to ${MAX_RULES_PER_USER} notification rules. Remove one to add another.`);
+    }
     if (error.code === '23505') {
       throw new ApiError('CONFLICT', 'A rule for this layer already exists on this location. Edit it instead.');
     }

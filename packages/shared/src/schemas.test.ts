@@ -4,6 +4,7 @@ import {
   createRuleSchema,
   layersPutSchema,
   mapQuerySchema,
+  isPushServiceEndpoint,
   pushSubscriptionSchema,
   validateRuleUpdate,
 } from './schemas';
@@ -92,7 +93,33 @@ describe('mapQuerySchema', () => {
 
 describe('pushSubscriptionSchema', () => {
   it('requires an https endpoint and keys', () => {
-    expect(pushSubscriptionSchema.safeParse({ endpoint: 'https://push.example/abc', keys: { p256dh: 'a', auth: 'b' } }).success).toBe(true);
+    expect(pushSubscriptionSchema.safeParse({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc', keys: { p256dh: 'a', auth: 'b' } }).success).toBe(true);
     expect(pushSubscriptionSchema.safeParse({ endpoint: 'not a url', keys: { p256dh: 'a', auth: 'b' } }).success).toBe(false);
+  });
+});
+
+describe('isPushServiceEndpoint', () => {
+  it.each([
+    'https://fcm.googleapis.com/fcm/send/abc:def',
+    'https://updates.push.services.mozilla.com/wpush/v2/gAAAA',
+    'https://web.push.apple.com/QGx',
+    'https://wns2-par02p.notify.windows.com/w/?token=abc',
+  ])('accepts the real push service %s', (endpoint) => {
+    expect(isPushServiceEndpoint(endpoint)).toBe(true);
+    expect(pushSubscriptionSchema.safeParse({ endpoint, keys: { p256dh: 'a', auth: 'b' } }).success).toBe(true);
+  });
+
+  it.each([
+    'https://example.com/x',
+    'http://fcm.googleapis.com/fcm/send/abc',
+    'https://fcm.googleapis.com.evil.test/x',
+    'https://evilfcm.googleapis.com.attacker.io/x',
+    'https://notfcm.googleapis.com@169.254.169.254/x',
+    'https://fcm.googleapis.com:8443/x',
+    'https://localhost/x',
+    'https://10.0.0.5/x',
+  ])('rejects %s', (endpoint) => {
+    expect(isPushServiceEndpoint(endpoint)).toBe(false);
+    expect(pushSubscriptionSchema.safeParse({ endpoint, keys: { p256dh: 'a', auth: 'b' } }).success).toBe(false);
   });
 });

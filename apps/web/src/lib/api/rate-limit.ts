@@ -7,8 +7,9 @@ interface Bucket {
 
 /**
  * Fixed-window, in-memory rate limiter (API Design §9).
- * Each serverless instance keeps its own counters, which is acceptable at MVP scale; swap the
- * store for Upstash/Redis if the public map endpoint starts seeing abuse across many instances.
+ * The web service runs as a single Railway replica, so one in-process Map is enough today. Counters
+ * reset on every deploy and are per instance: move the store to a shared one (e.g. Upstash Redis)
+ * before scaling the web service to more than one instance, or each replica gets its own budget.
  */
 const buckets = new Map<string, Bucket>();
 let lastSweep = Date.now();
@@ -48,10 +49,22 @@ export function rateLimitHeaders(result: RateLimitResult): Record<string, string
   };
 }
 
+/**
+ * The caller's IP for rate limiting. Railway's edge proxy appends the address it saw to
+ * X-Forwarded-For, so the right-most entry is the one a client cannot forge; earlier entries are
+ * whatever the client sent. Falls back to X-Real-IP.
+ */
 export function clientIp(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0]?.trim() || 'unknown';
-  return request.headers.get('x-real-ip') ?? 'unknown';
+  if (forwarded) {
+    const entries = forwarded
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    const last = entries[entries.length - 1];
+    if (last) return last;
+  }
+  return request.headers.get('x-real-ip')?.trim() || 'unknown';
 }
 
 export const LIMITS = {

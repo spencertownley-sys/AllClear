@@ -1,6 +1,7 @@
 import 'server-only';
 import { ApiError, FIRE_HISTORY_YEARS, type BBox, type GeoJsonGeometry, type HazardSource, type MapFireDTO, type MapHistoryDTO, type MapPerimeterDTO, type MapQuakeDTO, type MapResponse, type MapSmokePlumeDTO, type SmokeDensity, type StormDTO } from '@nimbuswatch/shared';
 import type { ServerSupabaseClient } from '@/lib/supabase/server';
+import { mapLimitsFor, roundCoord } from './map-limits';
 
 type BboxRow = {
   id: string;
@@ -15,8 +16,6 @@ type BboxRow = {
   attributes: unknown;
   fetched_at: string;
 };
-
-const MAX_MARKERS = 2500;
 
 type PolyRow = {
   id: string;
@@ -55,40 +54,48 @@ async function fetchPolygons(
   return (data ?? []) as PolyRow[];
 }
 
+async function fetchMarkers(supabase: ServerSupabaseClient, bbox: BBox, eventTypes: string[], limit: number): Promise<BboxRow[]> {
+  if (eventTypes.length === 0) return [];
+  const { data, error } = await supabase.rpc('hazards_in_bbox', {
+    p_min_lng: bbox.minLng,
+    p_min_lat: bbox.minLat,
+    p_max_lng: bbox.maxLng,
+    p_max_lat: bbox.maxLat,
+    p_event_types: eventTypes,
+    p_limit: limit,
+  });
+  if (error) {
+    console.error('[map] hazards_in_bbox failed', error.message);
+    throw new ApiError('INTERNAL_ERROR', 'Could not load map data');
+  }
+  return (data ?? []) as BboxRow[];
+}
+
 export async function getMapData(
   supabase: ServerSupabaseClient,
   bbox: BBox,
   layers: { fires: boolean; quakes: boolean; perimeters: boolean; storms: boolean; history: boolean; smoke: boolean },
   historyYears: number = FIRE_HISTORY_YEARS,
 ): Promise<MapResponse> {
-  const types: string[] = [];
-  if (layers.fires) types.push('fire_hotspot', 'fire_incident');
-  if (layers.quakes) types.push('earthquake');
-  if (layers.storms) types.push('tropical_cyclone');
+  const limits = mapLimitsFor(bbox);
+  // Fires and point hazards are capped separately: the RPC orders by magnitude, so in one shared
+  // query a busy quake week could crowd every fire out of a national view.
+  const fireTypes: string[] = layers.fires ? ['fire_hotspot', 'fire_incident'] : [];
+  const pointTypes: string[] = [];
+  if (layers.quakes) pointTypes.push('earthquake');
+  if (layers.storms) pointTypes.push('tropical_cyclone');
 
-  const polygonsPromise: Promise<PolyRow[]> = layers.perimeters ? fetchPolygons(supabase, bbox, ['fire_perimeter'], 400, null) : Promise.resolve([]);
+  const polygonsPromise: Promise<PolyRow[]> = layers.perimeters ? fetchPolygons(supabase, bbox, ['fire_perimeter'], limits.polygons, null) : Promise.resolve([]);
   // Largest fires first (the RPC orders by acres), so a national view shows the big ones and zooming in fills in the rest.
   const minYear = new Date().getUTCFullYear() - historyYears;
-  const historyPromise: Promise<PolyRow[]> = layers.history ? fetchPolygons(supabase, bbox, ['fire_perimeter_historical'], 400, minYear) : Promise.resolve([]);
-  const smokePromise: Promise<PolyRow[]> = layers.smoke ? fetchPolygons(supabase, bbox, ['smoke_plume'], 400, null) : Promise.resolve([]);
+  const historyPromise: Promise<PolyRow[]> = layers.history ? fetchPolygons(supabase, bbox, ['fire_perimeter_historical'], limits.polygons, minYear) : Promise.resolve([]);
+  const smokePromise: Promise<PolyRow[]> = layers.smoke ? fetchPolygons(supabase, bbox, ['smoke_plume'], limits.polygons, null) : Promise.resolve([]);
 
-  const rows: BboxRow[] = types.length
-    ? await (async () => {
-        const { data, error } = await supabase.rpc('hazards_in_bbox', {
-          p_min_lng: bbox.minLng,
-          p_min_lat: bbox.minLat,
-          p_max_lng: bbox.maxLng,
-          p_max_lat: bbox.maxLat,
-          p_event_types: types,
-          p_limit: MAX_MARKERS,
-        });
-        if (error) {
-          console.error('[map] hazards_in_bbox failed', error.message);
-          throw new ApiError('INTERNAL_ERROR', 'Could not load map data');
-        }
-        return (data ?? []) as BboxRow[];
-      })()
-    : [];
+  const [fireRows, pointRows] = await Promise.all([
+    fetchMarkers(supabase, bbox, fireTypes, limits.markers),
+    fetchMarkers(supabase, bbox, pointTypes, limits.markers),
+  ]);
+  const rows: BboxRow[] = [...fireRows, ...pointRows];
 
   const [polygons, historyRows, smokeRows] = await Promise.all([polygonsPromise, historyPromise, smokePromise]);
   const fires: MapFireDTO[] = [];
@@ -148,8 +155,8 @@ export async function getMapData(
         classification: typeof a.classification === 'string' ? a.classification : (row.severity ?? 'TC'),
         intensity_kt: typeof a.intensity_kt === 'number' ? a.intensity_kt : null,
         pressure_mb: typeof a.pressure_mb === 'number' ? a.pressure_mb : null,
-        latitude: Number(row.latitude),
-        longitude: Number(row.longitude),
+        latitude: roundCoord(row.latitude),
+        longitude: roundCoord(row.longitude),
         movement_dir: typeof a.movement_dir === 'number' ? a.movement_dir : null,
         movement_mph: typeof a.movement_mph === 'number' ? a.movement_mph : null,
         distance_miles: null,
@@ -162,8 +169,8 @@ export async function getMapData(
     }
     if (row.event_type === 'earthquake') {
       quakes.push({
-        latitude: Number(row.latitude),
-        longitude: Number(row.longitude),
+        latitude: roundCoord(row.latitude),
+        longitude: roundCoord(row.longitude),
         magnitude: Number(row.magnitude ?? 0),
         place: typeof a.place === 'string' ? a.place : row.title,
         occurred_at: row.occurred_at ?? row.fetched_at,
@@ -173,8 +180,8 @@ export async function getMapData(
     } else {
       const isIncident = row.event_type === 'fire_incident';
       fires.push({
-        latitude: Number(row.latitude),
-        longitude: Number(row.longitude),
+        latitude: roundCoord(row.latitude),
+        longitude: roundCoord(row.longitude),
         detected_at: row.occurred_at,
         source: row.source,
         kind: isIncident ? 'incident' : 'hotspot',

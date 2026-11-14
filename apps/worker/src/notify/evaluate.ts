@@ -87,12 +87,22 @@ async function priorFor(sb: TypedSupabaseClient, ruleId: string): Promise<PriorN
 }
 
 const emailCache = new Map<string, string | null>();
+/** The user's address, only once they have confirmed it (never mail an address someone else typed). */
 async function emailFor(sb: TypedSupabaseClient, userId: string): Promise<string | null> {
   if (emailCache.has(userId)) return emailCache.get(userId) ?? null;
   const { data, error } = await sb.auth.admin.getUserById(userId);
-  const email = error ? null : (data.user?.email ?? null);
+  const user = error ? null : data.user;
+  const email = user?.email && user.email_confirmed_at ? user.email : null;
   emailCache.set(userId, email);
   return email;
+}
+
+/**
+ * Which channels a rule asks for. Email goes only to rules that chose it ('email' or 'both'); a
+ * push-only rule with no working subscription gets no email (NW-10).
+ */
+export function channelsFor(channel: NotificationRule['channel']): { push: boolean; email: boolean } {
+  return { push: channel === 'web_push' || channel === 'both', email: channel === 'email' || channel === 'both' };
 }
 
 /**
@@ -125,20 +135,17 @@ export async function evaluateRules(sb: TypedSupabaseClient, config: WorkerConfi
           summary = `${candidate.hotspotCount} new wildfire hotspots detected within ${Math.round(Number(rule.threshold_value ?? 25))} mi of ${location.label} (nearest ${Math.round(candidate.event.distance_miles)} mi)`;
         }
         const url = `${config.APP_URL.replace(/\/$/, '')}/dashboard/${location.id}`;
-        const wantsPush = rule.channel === 'web_push' || rule.channel === 'both';
-        const wantsEmail = rule.channel === 'email' || rule.channel === 'both';
+        const { push: wantsPush, email: wantsEmail } = channelsFor(rule.channel);
         const delivered: Array<'web_push' | 'email'> = [];
 
-        let pushed = 0;
         if (wantsPush && pushEnabled(config)) {
           const subs = await loadSubscriptions(sb, location.user_id);
-          pushed = await sendPush(sb, config, subs, { title: `NimbusWatch · ${LAYER_LABELS[rule.layer_type]}`, body: summary, url, tag: `rule-${rule.id}` });
+          const pushed = await sendPush(sb, config, subs, { title: `NimbusWatch · ${LAYER_LABELS[rule.layer_type]}`, body: summary, url, tag: `rule-${rule.id}` });
           if (pushed > 0) delivered.push('web_push');
         }
-        // Email is the fallback when push was requested but couldn't be delivered (no subscription).
-        if ((wantsEmail || (wantsPush && pushed === 0)) && emailEnabled(config)) {
+        if (wantsEmail && emailEnabled(config)) {
           const email = await emailFor(sb, location.user_id);
-          if (email && (await sendEmail(config, email, `NimbusWatch: ${summary}`, summary, url))) delivered.push('email');
+          if (email && (await sendEmail(config, email, `NimbusWatch: ${summary}`, summary, url, { ruleId: rule.id, userId: location.user_id }))) delivered.push('email');
         }
         if (delivered.length === 0) {
           // Nothing configured for delivery yet — still record it so the in-app history shows it once.
@@ -159,7 +166,8 @@ export async function evaluateRules(sb: TypedSupabaseClient, config: WorkerConfi
           if (logErr) log.warn('notifications_log insert failed', { rule: rule.id, error: logErr.message });
         }
         sent += 1;
-        log.info('notification sent', { rule: rule.id, layer: rule.layer_type, channels: delivered, summary });
+        // No summary here: it contains the user's own place label (personal data stays out of logs).
+        log.info('notification sent', { rule: rule.id, user: location.user_id, layer: rule.layer_type, channels: delivered });
       }
     } catch (error) {
       log.error('rule evaluation failed', { rule: rule.id, ...errorFields(error) });

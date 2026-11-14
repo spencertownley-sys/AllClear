@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { hasSupabaseConfig } from '@/lib/env';
+import { safeNext } from '@/lib/safe-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
@@ -24,10 +25,6 @@ function validatePassword(value: string, mode: 'login' | 'signup'): string | nul
   if (!value) return 'Enter your password';
   if (mode === 'signup' && value.length < 8) return 'Use at least 8 characters';
   return null;
-}
-
-function safeNext(value: string | null): string {
-  return value && value.startsWith('/') && !value.startsWith('//') ? value : '';
 }
 
 /** Centred email/password form with inline validation on blur (UI/UX Notes §3, §5). */
@@ -65,7 +62,16 @@ export function AuthForm({ mode }: AuthFormProps) {
           options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next || '/onboarding')}` },
         });
         if (error) {
-          setFormError(error.message);
+          console.error('[auth] sign-up failed', error.message);
+          // Never reveal whether an address already has an account (NW-14): an existing address gets
+          // the same "check your email" screen as a new one.
+          if (error.code === 'user_already_exists' || /already registered/i.test(error.message)) {
+            setCheckEmail(true);
+          } else if (error.code === 'weak_password') {
+            setFormError('Choose a stronger password: at least 8 characters that are hard to guess.');
+          } else {
+            setFormError('Something went wrong. Please try again.');
+          }
           return;
         }
         if (data.session) {
@@ -77,7 +83,14 @@ export function AuthForm({ mode }: AuthFormProps) {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) {
-          setFormError(error.message === 'Invalid login credentials' ? 'Email or password is incorrect.' : error.message);
+          console.error('[auth] sign-in failed', error.message);
+          if (error.code === 'email_not_confirmed') {
+            setFormError('Confirm your email address first. Open the link we sent you, then log in.');
+          } else if (error.status === 429) {
+            setFormError('Too many attempts. Please wait a minute and try again.');
+          } else {
+            setFormError('Email or password is incorrect.');
+          }
           return;
         }
         router.replace(next || '/dashboard');
@@ -128,6 +141,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           required
         />
       </Field>
+      {mode === 'login' ? (
+        <p className="-mt-2 text-sm">
+          <Link href="/forgot-password" className="font-medium text-primary underline-offset-2 hover:underline">
+            Forgot your password?
+          </Link>
+        </p>
+      ) : null}
       {formError ? (
         <p role="alert" className="rounded-control border border-alert/30 bg-alert-soft px-3 py-2 text-sm text-alert-foreground">
           {formError}
