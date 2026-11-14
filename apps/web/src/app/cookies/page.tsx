@@ -47,7 +47,7 @@ export default async function CookiesPage() {
         <LegalTable
           head={['Key', 'Where', 'Purpose', 'Type']}
           rows={[
-            [<code key="k">allclear.map.prefs</code>, 'localStorage', 'Remembers your chosen map style, overlays and history range on the live map', 'Functional'],
+            [<code key="k">nimbuswatch.map.prefs</code>, 'localStorage', 'Remembers your chosen map style, overlays and history range on the live map', 'Functional'],
             [<code key="k">/sw.js</code>, 'Service worker (scope /)', 'Receives and shows push notifications, only after you turn them on', 'Necessary'],
             [<code key="k">cookie-consent</code>, 'localStorage', 'Remembers that you have seen the cookie notice', 'Necessary'],
           ]}

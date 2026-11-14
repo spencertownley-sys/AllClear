@@ -12,7 +12,9 @@ import { HazardMap, type MapPin } from './hazard-map';
 import { BASEMAPS, BASEMAP_IDS, DEFAULT_OVERLAYS, OVERLAYS, type BasemapId, type OverlayState } from './basemaps';
 
 const US_CENTER: [number, number] = [39.5, -98.35];
-const PREFS_KEY = 'allclear.map.prefs';
+const PREFS_KEY = 'nimbuswatch.map.prefs';
+/** Key used before the rename to NimbusWatch; read once, copied to PREFS_KEY, then removed. */
+const LEGACY_PREFS_KEY = 'allclear.map.prefs';
 
 interface LiveMapProps {
   /** Teaser mode: non-interactive, no controls, loads a fixed CONUS viewport. */
@@ -41,7 +43,12 @@ const EMPTY: MapResponse = {
 
 function readPrefs(): { basemap?: BasemapId; overlays?: Partial<OverlayState>; historyYears?: HistoryYears } | null {
   try {
-    const raw = window.localStorage.getItem(PREFS_KEY);
+    let raw = window.localStorage.getItem(PREFS_KEY);
+    if (!raw) {
+      raw = window.localStorage.getItem(LEGACY_PREFS_KEY);
+      if (raw) window.localStorage.setItem(PREFS_KEY, raw);
+    }
+    window.localStorage.removeItem(LEGACY_PREFS_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { basemap?: string; overlays?: Partial<OverlayState>; historyYears?: number };
     const basemap = BASEMAP_IDS.find((id) => id === parsed.basemap);
