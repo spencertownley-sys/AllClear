@@ -10,7 +10,6 @@ export const metadata: Metadata = { title: 'Privacy Policy', alternates: { canon
 
 /** Hosts the browser loads directly. Keep in step with components/map/* and the CSP in next.config.ts. */
 const BROWSER_THIRD_PARTIES: Array<[string, string, string]> = [
-  ['Google Fonts', 'Inter web font', 'Every page view'],
   ['OpenStreetMap Foundation (tile.openstreetmap.org)', 'Street map tiles', 'When the map shows the Street style (the default)'],
   ['US Geological Survey, The National Map (basemap.nationalmap.gov)', 'Satellite and topographic map tiles', 'When you pick Satellite or Topo'],
   ['RainViewer (api.rainviewer.com and the tile host it returns)', 'Weather radar overlay', 'When you turn on Radar'],

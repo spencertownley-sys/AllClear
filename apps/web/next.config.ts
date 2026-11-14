@@ -19,14 +19,14 @@ const isDev = process.env.NODE_ENV !== 'production';
 /**
  * Content-Security-Policy (NW-08). Hazard data is read through our own /api, so the only outside
  * hosts are the public map tiles and overlays the browser loads directly (CLAUDE.md rule 1), the
- * Supabase API for auth, and Sentry when a DSN is set. Keep this list in step with
- * components/map/basemaps.ts, components/map/radar.ts and the privacy and cookie pages.
+ * Supabase API for auth, and Sentry when a DSN is set. Fonts are self-hosted by next/font.
+ * Keep this list in step with components/map/basemaps.ts, components/map/radar.ts and the privacy and cookie pages.
  * Next.js injects inline bootstrap scripts, hence 'unsafe-inline'; dev mode also needs 'unsafe-eval'.
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline'",
   [
     "img-src 'self' data: blob:",
     'https://tile.openstreetmap.org',
@@ -47,7 +47,7 @@ const contentSecurityPolicy = [
   ]
     .filter(Boolean)
     .join(' '),
-  "font-src 'self' https://fonts.gstatic.com",
+  "font-src 'self'",
   "worker-src 'self'",
   "manifest-src 'self'",
   "frame-ancestors 'none'",

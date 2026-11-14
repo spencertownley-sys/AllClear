@@ -10,7 +10,6 @@ const TILE_RECEIVES = 'IP address, browser details, the map area viewed';
 
 /** Keep in step with what the app actually stores and loads (map prefs, service worker, map hosts). */
 const THIRD_PARTIES: Array<[string, string, string, string, string]> = [
-  ['Google Fonts', 'fonts.googleapis.com, fonts.gstatic.com', 'Inter web font', 'Every page view', 'IP address, browser details, page referrer'],
   ['OpenStreetMap Foundation', 'tile.openstreetmap.org', 'Street map tiles', 'When the map shows the Street style (the default)', TILE_RECEIVES],
   ['US Geological Survey (The National Map)', 'basemap.nationalmap.gov', 'Satellite and topographic map tiles', 'When you pick Satellite or Topo', TILE_RECEIVES],
   ['RainViewer', 'api.rainviewer.com and the tile host it returns', 'Weather radar overlay', 'When you turn on Radar', TILE_RECEIVES],

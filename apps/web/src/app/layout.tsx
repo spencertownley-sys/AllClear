@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+
+// Self-hosted by next/font: downloaded at build time and served from our own origin, so page views
+// don't send visitors' IP addresses to Google and the font doesn't block first paint (NW-09, NW-26).
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
   title: { default: 'NimbusWatch', template: '%s · NimbusWatch' },
@@ -21,14 +26,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Root layout applies to every route, so the pages-router "single page" caveat doesn't apply. */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={inter.variable}>
       <body className="font-sans">
         {children}
         <Toaster />
