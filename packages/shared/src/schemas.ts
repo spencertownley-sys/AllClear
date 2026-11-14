@@ -212,8 +212,38 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+/**
+ * Web Push services a browser subscription may point at. The worker POSTs to the stored endpoint,
+ * so anything else would let a user aim the worker at arbitrary (or internal) hosts.
+ * Keep in step with the CHECK constraint in supabase/migrations/20261114000000_push_endpoint_hosts.sql.
+ */
+export const PUSH_SERVICE_HOSTS = [
+  'fcm.googleapis.com',
+  'updates.push.services.mozilla.com',
+  'push.services.mozilla.com',
+  'web.push.apple.com',
+  'push.apple.com',
+  'notify.windows.com',
+] as const;
+
+/** True when the endpoint is https on the default port and its host is (a subdomain of) a known push service. */
+export function isPushServiceEndpoint(endpoint: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:' || url.port !== '' || url.username || url.password) return false;
+  const host = url.hostname.toLowerCase();
+  return PUSH_SERVICE_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+}
+
 export const pushSubscriptionSchema = z.object({
-  endpoint: z.url().max(2048),
+  endpoint: z
+    .url()
+    .max(2048)
+    .refine(isPushServiceEndpoint, { message: 'Push endpoint must be an https URL on a known browser push service' }),
   keys: z.object({
     p256dh: z.string().min(1).max(512),
     auth: z.string().min(1).max(256),
