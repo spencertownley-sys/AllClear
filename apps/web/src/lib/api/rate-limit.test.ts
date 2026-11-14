@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { _resetRateLimits, checkRateLimit, rateLimitHeaders } from './rate-limit';
+import { _resetRateLimits, checkRateLimit, clientIp, enforceRateLimit, rateLimitHeaders } from './rate-limit';
 
 describe('checkRateLimit', () => {
   beforeEach(() => _resetRateLimits());
@@ -32,5 +32,34 @@ describe('checkRateLimit', () => {
     expect(headers['X-RateLimit-Limit']).toBe('60');
     expect(headers['X-RateLimit-Remaining']).toBe('59');
     expect(headers['X-RateLimit-Reset']).toBe('2000');
+  });
+});
+
+describe('clientIp', () => {
+  const req = (headers: Record<string, string>) => new Request('https://example.test/api/geocode', { headers });
+
+  it('uses the right-most X-Forwarded-For entry (the one the proxy appended)', () => {
+    expect(clientIp(req({ 'x-forwarded-for': '1.1.1.1, 2.2.2.2' }))).toBe('2.2.2.2');
+    expect(clientIp(req({ 'x-forwarded-for': '9.9.9.9' }))).toBe('9.9.9.9');
+  });
+
+  it('falls back to X-Real-IP, then unknown', () => {
+    expect(clientIp(req({ 'x-real-ip': '3.3.3.3' }))).toBe('3.3.3.3');
+    expect(clientIp(req({ 'x-forwarded-for': ' , ' , 'x-real-ip': '4.4.4.4' }))).toBe('4.4.4.4');
+    expect(clientIp(req({}))).toBe('unknown');
+  });
+
+  it('still limits a client that rotates spoofed first entries', () => {
+    _resetRateLimits();
+    let blocked = 0;
+    for (let i = 0; i < 61; i++) {
+      const ip = clientIp(req({ 'x-forwarded-for': `10.0.${i}.1, 5.5.5.5` }));
+      try {
+        enforceRateLimit(`map:${ip}`, 60);
+      } catch {
+        blocked += 1;
+      }
+    }
+    expect(blocked).toBe(1);
   });
 });
