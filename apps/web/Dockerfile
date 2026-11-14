@@ -26,6 +26,10 @@ ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
 RUN pnpm --filter @nimbuswatch/web build
 
 ENV NODE_ENV=production
+# Run as the image's unprivileged "node" user. Only .next needs to be writable at runtime (Next's
+# cache); the rest of /app stays root-owned and read-only to the server process.
+RUN chown -R node:node /app/apps/web/.next
+USER node
 EXPOSE 3000
 WORKDIR /app/apps/web
 CMD ["./node_modules/.bin/next", "start", "-p", "3000", "-H", "0.0.0.0"]
