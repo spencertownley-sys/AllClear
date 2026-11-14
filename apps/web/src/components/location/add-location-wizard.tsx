@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
 import { Spinner } from '@/components/ui/spinner';
+import { SafetyDisclaimer } from '@/components/ui/safety-disclaimer';
 import { LocationSearch } from './location-search';
 import { LayerEditor, defaultLayers } from './layer-editor';
 
@@ -159,6 +160,7 @@ export function AddLocationWizard({ firstTime, initial }: WizardProps) {
             <p className="mt-1 text-sm text-slate-500">Everything is on by default. Turn off anything you don&apos;t care about.</p>
           </div>
           <LayerEditor layers={layers} onChange={setLayers} disabled={saving} />
+          <SafetyDisclaimer variant="compact" />
           {saveError ? (
             <p role="alert" className="rounded-control border border-alert/30 bg-alert-soft px-3 py-2 text-sm text-alert-foreground">
               {saveError}

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Bell, LayoutDashboard, Map, Settings, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { SiteFooter } from '@/components/nav/site-footer';
 
 export interface ShellUser {
   email: string | null;
@@ -92,7 +93,10 @@ export function AppShell({ user, children }: AppShellProps) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-5 md:pb-10">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-5 md:pb-10">
+        {children}
+        <SiteFooter />
+      </main>
 
       {user ? (
         <nav

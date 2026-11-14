@@ -14,8 +14,9 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/** Same wording as the web app's SafetyDisclaimer (apps/web/src/components/ui/safety-disclaimer.tsx). */
 export const EMAIL_DISCLAIMER =
-  'NimbusWatch relays public data from NWS, NASA FIRMS, USGS, AirNow and NIFC. It is not an official emergency notification system.';
+  'NimbusWatch relays public data from NWS, NASA FIRMS, USGS, AirNow and NIFC. It is not an emergency alert system and is not for life-safety decisions. Data can be delayed, incomplete or wrong, and notifications can fail. In an emergency call 911 and follow instructions from local officials, Wireless Emergency Alerts and NOAA Weather Radio.';
 
 export interface EmailParts {
   /** The alert text. */

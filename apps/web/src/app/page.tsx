@@ -6,7 +6,6 @@ import { getOptionalUser } from '@/lib/supabase/server';
 import { AppShell } from '@/components/nav/app-shell';
 import { Button } from '@/components/ui/button';
 import { LiveMap } from '@/components/map/live-map';
-import { SiteFooter } from '@/components/nav/site-footer';
 
 /** Marketing / landing (logged out). Logged-in users go straight to their dashboard. */
 export default async function LandingPage() {
@@ -85,7 +84,6 @@ export default async function LandingPage() {
         </ul>
       </section>
 
-      <SiteFooter />
     </AppShell>
   );
 }

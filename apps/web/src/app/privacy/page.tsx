@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getOptionalUser } from '@/lib/supabase/server';
 import { AppShell } from '@/components/nav/app-shell';
-import { SiteFooter } from '@/components/nav/site-footer';
 import { ContactEmail, LegalHeading, LegalList, LegalTable, LegalTitle } from '@/components/legal/prose';
 import { LEGAL } from '@/lib/legal';
 
@@ -133,7 +132,6 @@ export default async function PrivacyPage() {
           If this policy changes in a way that matters, the date at the top changes and a notice is shown in the app.
         </p>
       </article>
-      <SiteFooter />
     </AppShell>
   );
 }

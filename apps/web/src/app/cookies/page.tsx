@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getOptionalUser } from '@/lib/supabase/server';
 import { AppShell } from '@/components/nav/app-shell';
-import { SiteFooter } from '@/components/nav/site-footer';
 import { ContactEmail, LegalHeading, LegalTable, LegalTitle } from '@/components/legal/prose';
 
 export const metadata: Metadata = { title: 'Cookie Policy', alternates: { canonical: '/cookies' } };
@@ -75,7 +74,6 @@ export default async function CookiesPage() {
           Questions about this page: <ContactEmail />.
         </p>
       </article>
-      <SiteFooter />
     </AppShell>
   );
 }

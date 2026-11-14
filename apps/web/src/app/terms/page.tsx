@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getOptionalUser } from '@/lib/supabase/server';
 import { AppShell } from '@/components/nav/app-shell';
-import { SiteFooter } from '@/components/nav/site-footer';
 import { ContactEmail, LegalHeading, LegalList, LegalTitle } from '@/components/legal/prose';
 import { LEGAL } from '@/lib/legal';
+import { SAFETY_DISCLAIMER } from '@/components/ui/safety-disclaimer';
 
 export const metadata: Metadata = { title: 'Terms of Service', alternates: { canonical: '/terms' } };
 
@@ -20,11 +20,7 @@ export default async function TermsPage() {
         </p>
 
         <LegalHeading>Not an emergency service</LegalHeading>
-        <p className="mt-1">
-          NimbusWatch is not an emergency alert system and is not for life-safety decisions. Data can be delayed,
-          incomplete or wrong, and notifications can fail. In an emergency call 911 and follow instructions from local
-          officials, Wireless Emergency Alerts and NOAA Weather Radio.
-        </p>
+        <p className="mt-1">{SAFETY_DISCLAIMER}</p>
 
         <LegalHeading>Who provides the service</LegalHeading>
         <p className="mt-1">
@@ -102,7 +98,6 @@ export default async function TermsPage() {
           Continuing to use NimbusWatch after a change means you accept the new terms.
         </p>
       </article>
-      <SiteFooter />
     </AppShell>
   );
 }
